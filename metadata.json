@@ -1,0 +1,8 @@
+{
+  "name": "EduGen",
+  "description": "An AI-powered learning toolkit with MCQ generation, essay questions, topic explanations, and formal writing tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
