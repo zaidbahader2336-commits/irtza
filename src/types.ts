@@ -65,4 +65,4 @@ export interface User {
   data: UserData;
 }
 
-export type ToolType = 'home' | 'mcq' | 'short' | 'long' | 'explainer' | 'story-letter' | 'exam' | 'history' | 'visual';
+export type ToolType = 'home' | 'mcq' | 'short' | 'long' | 'explainer' | 'story-letter' | 'exam' | 'history' | 'visual' | 'share';

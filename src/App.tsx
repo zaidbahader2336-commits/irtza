@@ -27,7 +27,8 @@ import {
   ChevronDown,
   ChevronLeft,
   Eye,
-  Settings
+  Settings,
+  Share2
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import MCQGenerator from './components/tools/MCQGenerator';
@@ -38,14 +39,15 @@ import StoryLetterWriter from './components/tools/StoryLetterWriter';
 import ExamMode from './components/tools/ExamMode';
 import History from './components/tools/History';
 import VisualAnalysis from './components/tools/VisualAnalysis';
-import AuthManager from './components/auth/AuthManager';
+import ShareEduGen from './components/tools/ShareEduGen';
+import { getOrCreateDefaultUser } from './lib/userData';
 import { ToolType, User } from './types';
 
 export default function App() {
   const [activeTool, setActiveTool] = useState<ToolType>('home');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [downloads, setDownloads] = useState<string[]>([]);
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User>(getOrCreateDefaultUser());
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [apiKey, setApiKey] = useState('');
@@ -75,10 +77,7 @@ export default function App() {
 
   // Loaded from localStorage
   useEffect(() => {
-    const session = sessionStorage.getItem('edugen_session');
-    if (session) {
-      setUser(JSON.parse(session));
-    }
+    setUser(getOrCreateDefaultUser());
     const savedKey = localStorage.getItem('edugen_gemini_api_key');
     if (savedKey) {
       setApiKey(savedKey);
@@ -88,16 +87,6 @@ export default function App() {
   const handleSaveSettings = () => {
     localStorage.setItem('edugen_gemini_api_key', apiKey);
     setShowSettingsModal(false);
-  };
-
-  const handleLogin = (newUser: User) => {
-    setUser(newUser);
-  };
-
-  const handleLogout = () => {
-    sessionStorage.removeItem('edugen_session');
-    setUser(null);
-    setShowProfileMenu(false);
   };
 
   const tools = [
@@ -181,15 +170,21 @@ export default function App() {
       borderStyle: 'hover:border-[#10B981]/50 group-hover:text-[#10B981]',
       description: 'Review and manage your saved content vault' 
     },
+    { 
+      id: 'share', 
+      name: 'Share', 
+      icon: Share2, 
+      color: '#4F46E5', 
+      bgColor: 'bg-[#4F46E5]/10', 
+      hoverColor: 'hover:border-[#4F46E5]',
+      borderStyle: 'hover:border-[#4F46E5]/50 group-hover:text-[#4F46E5]',
+      description: 'Invite your classmates and friends' 
+    },
   ];
 
   const handleDownloadAdded = (name: string) => {
     setDownloads(prev => [name, ...prev].slice(0, 5));
   };
-
-  if (!user) {
-    return <AuthManager onLogin={handleLogin} />;
-  }
 
   return (
     <div className="flex h-screen bg-[#F8FAFF] font-sans text-[#0F172A] overflow-hidden">
@@ -333,16 +328,6 @@ export default function App() {
                 </div>
               )}
             </div>
-            {(sidebarOpen || isMobile) && (
-              <button 
-                onClick={handleLogout}
-                className="p-2 text-[#94A3B8] hover:text-[#EF4444] rounded-lg hover:bg-red-50 transition-all-colors duration-150"
-                title="Log Out"
-                aria-label="Log out"
-              >
-                <LogOut size={18} />
-              </button>
-            )}
           </div>
 
           {!isMobile && (
@@ -437,13 +422,6 @@ export default function App() {
                       <Settings size={16} />
                       <span>App Settings</span>
                     </button>
-                    <button 
-                      onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-5 py-3 text-xs font-bold text-[#EF4444] hover:bg-red-50 transition-colors"
-                    >
-                      <LogOut size={16} />
-                      <span>Log Out Account</span>
-                    </button>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -533,6 +511,7 @@ export default function App() {
                     {activeTool === 'exam' && <ExamMode onDownload={handleDownloadAdded} />}
                     {activeTool === 'visual' && <VisualAnalysis onDownload={handleDownloadAdded} />}
                     {activeTool === 'history' && <History onDownload={handleDownloadAdded} />}
+                    {activeTool === 'share' && <ShareEduGen />}
                   </>
                 )}
               </motion.div>

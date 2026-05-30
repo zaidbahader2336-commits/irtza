@@ -156,6 +156,10 @@ export default function ExamMode({ onDownload }: ExamModeProps) {
 
     exam.mcqs.forEach((q, i) => {
       content.push({ type: 'subheading', text: `Q${i + 1}: ${q.question}` });
+      q.options.forEach((opt, idx) => {
+        const optionLetter = String.fromCharCode(65 + idx); // A, B, C, D
+        content.push({ type: 'text', text: `${optionLetter}) ${opt}` });
+      });
       content.push({ type: 'text', text: `Correct Answer: ${q.options[q.correctIndex]}` });
       content.push({ type: 'text', text: `Explanation: ${q.explanation}` });
     });

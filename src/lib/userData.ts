@@ -1,55 +1,62 @@
 import { User, MCQ, ShortQuestion, LongQuestion, ExamPaper, Story, Letter, TopicExplanation } from '../types';
 
+const INITIAL_USER: User = {
+  name: 'EduGen Student',
+  gmail: 'student@edugen.app',
+  code: 'ZWR1Z2Vu',
+  createdAt: Date.now(),
+  data: {
+    mcqs: [],
+    shortQs: [],
+    longQs: [],
+    exams: [],
+    stories: [],
+    letters: [],
+    explanations: []
+  }
+};
+
+export const getOrCreateDefaultUser = (): User => {
+  const saved = localStorage.getItem('edugen_app_user');
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch (e) {
+      // Use fallback if parse fails
+    }
+  }
+  localStorage.setItem('edugen_app_user', JSON.stringify(INITIAL_USER));
+  return INITIAL_USER;
+};
+
 export const saveToUserHistory = (
   type: 'mcqs' | 'shortQs' | 'longQs' | 'exams' | 'stories' | 'letters' | 'explanations',
   topic: string,
   data: any
 ) => {
-  const session = sessionStorage.getItem('edugen_session');
-  if (!session) return;
-
-  const currentUser: User = JSON.parse(session);
-  const users: User[] = JSON.parse(localStorage.getItem('edugen_users') || '[]');
-  
-  const userIdx = users.findIndex(u => u.gmail === currentUser.gmail);
-  if (userIdx === -1) return;
-
+  const currentUser = getOrCreateDefaultUser();
   const newItem = {
     data,
     topic,
     timestamp: Date.now()
   };
 
-  // Update in localStorage
-  users[userIdx].data[type] = [newItem, ...(users[userIdx].data[type] || [])];
-  localStorage.setItem('edugen_users', JSON.stringify(users));
-
-  // Update current session reference
-  currentUser.data = users[userIdx].data;
-  sessionStorage.setItem('edugen_session', JSON.stringify(currentUser));
+  currentUser.data[type] = [newItem, ...(currentUser.data[type] || [])];
+  localStorage.setItem('edugen_app_user', JSON.stringify(currentUser));
 };
 
-export const getUserHistory = (): User | null => {
-  const session = sessionStorage.getItem('edugen_session');
-  if (!session) return null;
-  return JSON.parse(session);
+export const getUserHistory = (): User => {
+  return getOrCreateDefaultUser();
 };
 
-export const deleteHistoryItem = (type: string, timestamp: number) => {
-  const session = sessionStorage.getItem('edugen_session');
-  if (!session) return;
-
-  const currentUser: User = JSON.parse(session);
-  const users: User[] = JSON.parse(localStorage.getItem('edugen_users') || '[]');
+export const deleteHistoryItem = (type: string, timestamp: number): User => {
+  const currentUser = getOrCreateDefaultUser();
   
-  const userIdx = users.findIndex(u => u.gmail === currentUser.gmail);
-  if (userIdx === -1) return;
-
   // @ts-ignore
-  users[userIdx].data[type] = users[userIdx].data[type].filter((item: any) => item.timestamp !== timestamp);
-  localStorage.setItem('edugen_users', JSON.stringify(users));
-
-  currentUser.data = users[userIdx].data;
-  sessionStorage.setItem('edugen_session', JSON.stringify(currentUser));
+  if (currentUser.data[type]) {
+    // @ts-ignore
+    currentUser.data[type] = currentUser.data[type].filter((item: any) => item.timestamp !== timestamp);
+  }
+  localStorage.setItem('edugen_app_user', JSON.stringify(currentUser));
   return currentUser;
 };

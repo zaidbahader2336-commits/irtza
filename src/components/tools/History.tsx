@@ -18,6 +18,7 @@ import { cn } from '../../lib/utils';
 import { User, ToolType } from '../../types';
 import { getUserHistory, deleteHistoryItem } from '../../lib/userData';
 import { generatePDF } from '../../lib/pdf';
+import ShareEduGen from './ShareEduGen';
 
 interface HistoryProps {
   onDownload: (name: string) => void;
@@ -183,6 +184,9 @@ export default function History({ onDownload }: HistoryProps) {
             ))}
          </div>
        )}
+       <div className="mt-8 pt-6 border-t border-[#E2E8F0]">
+         <ShareEduGen isBanner={true} />
+       </div>
     </div>
   );
 }
