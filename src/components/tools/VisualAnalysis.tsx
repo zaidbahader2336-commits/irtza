@@ -27,7 +27,10 @@ import {
   Copy,
   Check,
   Info,
-  PenTool
+  PenTool,
+  Image as ImageIcon,
+  Search,
+  ExternalLink
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { generatePDF, PDFItem } from '../../lib/pdf';
@@ -97,6 +100,117 @@ export default function VisualAnalysis({ onDownload }: Props) {
   const [shortAnswers, setShortAnswers] = useState<Record<number, string>>({});
   const [shortFeedbacks, setShortFeedbacks] = useState<Record<number, { score: number; feedback: string; improvement: string }>>({});
   const [checkingShort, setCheckingShort] = useState<Record<number, boolean>>({});
+
+  // Pexels API integration states
+  const [pexelsPhotos, setPexelsPhotos] = useState<any[]>([]);
+  const [pexelsQuery, setPexelsQuery] = useState('');
+  const [pexelsLoading, setPexelsLoading] = useState(false);
+  const [pexelsError, setPexelsError] = useState<string | null>(null);
+
+  const cleanQueryText = (rawStr: string): string => {
+    if (!rawStr) return '';
+    // Strip file extensions, chapter titles, lesson numbers, punctuation, common filler words
+    let term = rawStr
+      .replace(/\.[^/.]+$/, "") // delete extensions (.pdf, .png etc)
+      .replace(/\b(ch|chap|chapter|sec|section|lec|lecture|slide|week|unit|quiz|assignment|exam|test|doc|docx|ppt|pptx|pdf)\b\s*\d*/gi, "") // slides reference numbers
+      .replace(/[_-]/g, " ") // replace dashes or underscores
+      .replace(/[^\w\s]/g, "") // punctuation
+      .trim()
+      .replace(/\s+/g, " "); // consolidate whitespace
+    return term;
+  };
+
+  const getInitialPexelsQuery = (): string => {
+    if (!file) return '';
+    const cleanName = cleanQueryText(file.name);
+    if (!cleanName || cleanName.length < 2) return 'educational science';
+    
+    // Add specific scientific qualifiers depending on context
+    const lower = cleanName.toLowerCase();
+    if (lower.includes('heart') || lower.includes('brain') || lower.includes('cell') || lower.includes('dna') || lower.includes('plant') || lower.includes('anatomy') || lower.includes('body')) {
+      return `${cleanName} diagram`;
+    }
+    return cleanName;
+  };
+
+  const getSuggestedTags = () => {
+    if (!file) return [];
+    const base = cleanQueryText(file.name);
+    if (!base) return ['educational diagram', 'science science'];
+
+    const tags = [base];
+    const lower = base.toLowerCase();
+
+    // Dynamically design smart textbook queries depending on matched academic domains
+    if (lower.includes('cell') || lower.includes('bio') || lower.includes('plant') || lower.includes('animal') || lower.includes('mitosis') || lower.includes('chloroplast') || lower.includes('photic')) {
+      tags.push(`${base} cell biology`);
+      tags.push("biology model");
+      tags.push("laboratory science");
+    } else if (lower.includes('heart') || lower.includes('brain') || lower.includes('body') || lower.includes('muscle') || lower.includes('organ') || lower.includes('anatomy') || lower.includes('bone') || lower.includes('eye')) {
+      tags.push(`${base} anatomy`);
+      tags.push("medical blueprint");
+      tags.push("human organ model");
+    } else if (lower.includes('atom') || lower.includes('molecule') || lower.includes('chem') || lower.includes('acid') || lower.includes('bond') || lower.includes('reaction')) {
+      tags.push(`${base} molecular model`);
+      tags.push("chemistry concept");
+      tags.push("atomic schematic");
+    } else if (lower.includes('earth') || lower.includes('planet') || lower.includes('star') || lower.includes('space') || lower.includes('solar') || lower.includes('orbit')) {
+      tags.push(`${base} solar system`);
+      tags.push("planetary scheme");
+      tags.push("space textbook graphic");
+    } else {
+      // General science topics
+      tags.push(`${base} diagram model`);
+      tags.push(`${base} illustration schematic`);
+      tags.push("educational graphics");
+    }
+
+    return Array.from(new Set(tags)).filter(t => t && t.trim().length > 2).slice(0, 5);
+  };
+
+  const fetchPexelsDiagrams = async (searchTerm: string) => {
+    if (!searchTerm || !searchTerm.trim()) return;
+    setPexelsLoading(true);
+    setPexelsError(null);
+    try {
+      const res = await fetch(`/api/pexels-search?query=${encodeURIComponent(searchTerm)}&per_page=12`);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to fetch images from Pexels.");
+      }
+      
+      let photos = data.photos || [];
+
+      // Smart Broad Fallback if 0 results
+      if (photos.length === 0) {
+        let fallbackTerm = "science diagram";
+        const lower = searchTerm.toLowerCase();
+        if (lower.includes('cell') || lower.includes('bio') || lower.includes('plant') || lower.includes('animal') || lower.includes('mitosis') || lower.includes('chloroplast') || lower.includes('photic')) {
+          fallbackTerm = "biology model";
+        } else if (lower.includes('heart') || lower.includes('brain') || lower.includes('body') || lower.includes('muscle') || lower.includes('organ') || lower.includes('anatomy') || lower.includes('bone') || lower.includes('eye')) {
+          fallbackTerm = "human anatomy model";
+        } else if (lower.includes('atom') || lower.includes('molecular') || lower.includes('chem') || lower.includes('reaction') || lower.includes('acid') || lower.includes('bond')) {
+          fallbackTerm = "chemistry formula illustration";
+        } else if (lower.includes('space') || lower.includes('star') || lower.includes('planet') || lower.includes('system') || lower.includes('solar') || lower.includes('orbit')) {
+          fallbackTerm = "solar system space";
+        }
+
+        console.warn(`0 results for "${searchTerm}", trying fallback search: "${fallbackTerm}"`);
+        const fallbackRes = await fetch(`/api/pexels-search?query=${encodeURIComponent(fallbackTerm)}&per_page=12`);
+        const fallbackData = await fallbackRes.json();
+        if (fallbackRes.ok && fallbackData.photos && fallbackData.photos.length > 0) {
+          photos = fallbackData.photos;
+        }
+      }
+
+      setPexelsPhotos(photos);
+    } catch (err: any) {
+      console.error(err);
+      setPexelsError(err.message || "Unable to load diagrams from Pexels.");
+    } finally {
+      setPexelsLoading(false);
+    }
+  };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -345,6 +459,13 @@ export default function VisualAnalysis({ onDownload }: Props) {
           misconceptions: ["Ensure high resolution files are uploaded for complex diagrams."],
           detailedExplanation: data.text
         });
+      }
+
+      // Automatically search Pexels diagrams
+      const initialQuery = getInitialPexelsQuery();
+      if (initialQuery) {
+        setPexelsQuery(initialQuery);
+        fetchPexelsDiagrams(initialQuery);
       }
     } catch (err: any) {
       console.error(err);
@@ -1266,6 +1387,186 @@ export default function VisualAnalysis({ onDownload }: Props) {
                           </details>
                         </div>
                       ))}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            ) : null}
+
+            {/* 6. PEXELS DIAGRAMS & VISUAL AIDS EXPLORER */}
+            {(resultText || resultJson) ? (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.15 }}
+                className="mt-8 bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden text-left pointer-events-auto"
+              >
+                <div className="bg-gradient-to-r from-violet-50 to-indigo-50 p-6 border-b border-[#E2E8F0] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-violet-600/10 text-violet-600 flex items-center justify-center shadow-xs">
+                      <ImageIcon size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-serif font-black text-slate-800 text-lg flex items-center gap-2">
+                        Pexels Reference Diagrams & Visual Aids
+                        <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase bg-violet-100 text-violet-600 px-2 py-0.5 rounded-full tracking-wider">
+                          Pexels Live API
+                        </span>
+                      </h3>
+                      <p className="text-slate-500 font-medium text-xs mt-0.5">Explore educational diagrams, scientific graphics, and schematic photos.</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 sm:p-8 space-y-6">
+                  {/* Search controls & Suggested tags */}
+                  <div className="flex flex-col gap-4">
+                    <form 
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        fetchPexelsDiagrams(pexelsQuery);
+                      }}
+                      className="flex gap-2"
+                    >
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                        <input
+                          type="text"
+                          placeholder="Search diagrams on Pexels (e.g. human heart, plant cell)..."
+                          value={pexelsQuery}
+                          onChange={(e) => setPexelsQuery(e.target.value)}
+                          className="w-full text-xs font-semibold text-slate-700 placeholder-[#94A3B8] pl-10 pr-4 py-3 bg-slate-50 border border-[#E2E8F0] rounded-xl focus:outline-none focus:border-violet-500 focus:ring-3 focus:ring-violet-500/10 transition-all leading-normal"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={pexelsLoading}
+                        className="px-5 py-3 text-xs font-black rounded-xl bg-violet-600 hover:bg-violet-750 text-white flex items-center gap-1.5 transition-colors shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
+                      >
+                        {pexelsLoading ? (
+                          <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                          <Search size={14} />
+                        )}
+                        Search
+                      </button>
+                    </form>
+
+                    {/* Suggested tags */}
+                    {getSuggestedTags().length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-[10px] uppercase font-extrabold tracking-wider text-[#94A3B8] mr-1.5">Suggested:</span>
+                        {getSuggestedTags().map((tag, tIdx) => (
+                          <button
+                            key={tIdx}
+                            type="button"
+                            onClick={() => {
+                              setPexelsQuery(tag);
+                              fetchPexelsDiagrams(tag);
+                            }}
+                            className={cn(
+                              "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer shadow-3xs",
+                              pexelsQuery === tag
+                                ? "bg-violet-50 border-violet-200 text-violet-600"
+                                : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-slate-50"
+                            )}
+                          >
+                            {tag}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Photos Grid or states */}
+                  {pexelsLoading ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {Array.from({ length: 6 }).map((_, idx) => (
+                        <div key={idx} className="bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-3 animate-pulse">
+                          <div className="bg-slate-200 rounded-lg aspect-video h-40 w-full" />
+                          <div className="space-y-1.5">
+                            <div className="h-3 w-3/4 bg-slate-200 rounded-sm" />
+                            <div className="h-2.5 w-1/2 bg-slate-200 rounded-sm" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : pexelsError ? (
+                    <div className="bg-amber-50 border border-amber-100 p-6 rounded-xl text-center space-y-2">
+                      <AlertTriangle className="text-amber-500 mx-auto" size={24} />
+                      <p className="text-xs font-bold text-amber-900">Unable to Fetch Diagrams</p>
+                      <p className="text-[11px] text-amber-700 leading-relaxed max-w-lg mx-auto">
+                        {pexelsError}
+                      </p>
+                      <p className="text-[10px] text-slate-500 max-w-sm mx-auto">
+                        Make sure you have declared <code className="font-mono bg-white px-1.5 py-0.5 rounded border border-[#E2E8F0]">PEXELS_API_KEY</code> properly in your environment secrets or backend config.
+                      </p>
+                    </div>
+                  ) : pexelsPhotos.length === 0 ? (
+                    <div className="bg-slate-50/50 border border-[#E2E8F0] p-8 rounded-xl text-center space-y-2">
+                      <ImageIcon className="text-slate-300 mx-auto" size={28} />
+                      <p className="text-xs font-bold text-slate-700 text-center">No Diagrams Found</p>
+                      <p className="text-[11px] text-slate-500 max-w-md mx-auto leading-relaxed">
+                        Pexels returned no exact matches for <span className="font-semibold text-slate-800">"{pexelsQuery || 'your query'}"</span>. Try typing broader educational keywords (e.g. "Biology Cell" or "Human Organs" or "Planet Mars") above.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {pexelsPhotos.map((photo) => (
+                          <div 
+                            key={photo.id} 
+                            className="group bg-white border border-[#E2E8F0] rounded-xl p-3 shadow-3xs hover:shadow-xs hover:border-violet-200 transition-all flex flex-col justify-between overflow-hidden"
+                          >
+                            <div className="rounded-lg overflow-hidden relative aspect-video bg-slate-100 flex items-center justify-center">
+                              <img 
+                                src={photo.src.medium} 
+                                alt={photo.alt || "Diagram image"} 
+                                referrerPolicy="no-referrer"
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                              />
+                              <a 
+                                href={photo.url} 
+                                target="_blank" 
+                                rel="noreferrer" 
+                                className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 flex items-center justify-center"
+                                title="Open full page on Pexels"
+                              >
+                                <ExternalLink size={12} />
+                              </a>
+                            </div>
+
+                            <div className="mt-3 space-y-1">
+                              <p className="text-[11px] font-bold text-slate-800 line-clamp-1">
+                                {photo.alt || "Educational Visual Aid"}
+                              </p>
+                              <div className="flex items-center justify-between">
+                                <p className="text-[10px] text-slate-400 font-medium">
+                                  By: <a 
+                                    href={photo.photographer_url} 
+                                    target="_blank" 
+                                    rel="noreferrer" 
+                                    className="hover:underline font-semibold text-slate-500"
+                                  >
+                                    {photo.photographer}
+                                  </a>
+                                </p>
+                                <a
+                                  href={photo.src.large2x || photo.src.original}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-[10px] font-black text-violet-600 hover:underline flex items-center gap-0.5"
+                                >
+                                  View High-Res
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-[9px] text-[#64748B] font-mono select-none text-center pt-2">
+                        Images and illustrations are fetched live using Pexels Creative Commons Licensing guidelines.
+                      </p>
                     </div>
                   )}
                 </div>

@@ -3,7 +3,7 @@ import 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 
 export interface PDFItem {
-  type: 'heading' | 'subheading' | 'text' | 'blankLines';
+  type: 'heading' | 'subheading' | 'text' | 'blankLines' | 'image';
   text?: string;
   count?: number;
 }
@@ -785,10 +785,12 @@ export const isAnswerLine = (text: string): boolean => {
   
   return (
     lowerText.includes('correct answer') || 
-    lowerText.includes('explanation:') ||
-    lowerText.startsWith('explanation') ||
-    lowerText.startsWith('correct index') ||
+    lowerText.includes('correct option') || 
+    lowerText.includes('correct choice') || 
+    lowerText.includes('correct index') || 
+    lowerText.includes('explanation') ||
     lowerText.includes('model answer') ||   
+    lowerText.includes('model reference answer') ||   
     lowerText.includes('model essay') || 
     lowerText.includes('your answer') || 
     lowerText.includes('user answer') || 
@@ -1305,21 +1307,7 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
       // Draw overall beautiful Card and Indigo Ribbon accent for Section A
       drawCard(doc, currentY, cardHeight, COLORS.midIndigo);
 
-      // Question Name block
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(8);
-      setTextColorHex(doc, COLORS.midIndigo);
-      doc.text(qNum, 20, currentY + 5.5);
-
-      // Question text rendering with consistent line height
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(10.5);
-      setTextColorHex(doc, COLORS.darkText);
-      textLines.forEach((line: string, lIdx: number) => {
-        doc.text(line, 20, currentY + 11.5 + (lIdx * 5.2));
-      });
-
-      // MCQ 2x2 Grid Area Background Banner
+      // MCQ 2x2 Grid Area Background Banner (Draw backgrounds FIRST before ANY text is rendered on top of it)
       const optionsY = currentY + cardHeight - 17;
       setFillColorHex(doc, '#F8FAFF');
       doc.rect(14.3, optionsY, 181.4, 14, 'F');
@@ -1327,6 +1315,20 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
       setDrawColorHex(doc, '#EEF2FF');
       doc.setLineWidth(0.5);
       doc.line(14, optionsY, 196, optionsY);
+
+      // Question Name block
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      setTextColorHex(doc, COLORS.midIndigo);
+      doc.text(qNum, 20, currentY + 5.5);
+
+      // Question text rendering with consistent line height (drawn on top of background shapes)
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10.5);
+      setTextColorHex(doc, COLORS.darkText);
+      textLines.forEach((line: string, lIdx: number) => {
+        doc.text(line, 20, currentY + 11.5 + (lIdx * 5.2));
+      });
 
       // Fill options
       const colX1 = 18;
@@ -1343,7 +1345,7 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
 
       optLayout.forEach(opt => {
         if (!opt.text) return;
-        // Letter indicator Rounded Box
+        // Letter indicator Rounded Box background
         setFillColorHex(doc, COLORS.indigoTint);
         setDrawColorHex(doc, COLORS.indigoBorder);
         doc.setLineWidth(0.3);
@@ -1515,8 +1517,48 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
     });
   }
 
+  // ━━━ RENDER IMAGES (e.g., PEXELS DIAGRAMS & ILLUSTRATIONS) ━━━
+  const imageItems = content.filter(item => item.type === 'image');
+  if (imageItems.length > 0) {
+    handlePageBreak(40);
+    drawSectionHeader(doc, 'Visual Reference Diagrams', 'PEXELS VISUAL AIDS', currentY, COLORS.midIndigo, COLORS.darkNavy, COLORS.midIndigo);
+    currentY += 14;
+
+    imageItems.forEach((imgItem, idx) => {
+      if (imgItem.text) {
+        // We fit the image inside a styled card. Height is 85mm.
+        handlePageBreak(102);
+
+        // Render card border and background
+        drawCard(doc, currentY, 94, COLORS.midIndigo);
+
+        // Title/label for the image
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(8.5);
+        setTextColorHex(doc, COLORS.midIndigo);
+        doc.text("Pexels Reference Image Source:", 20, currentY + 6);
+
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9);
+        setTextColorHex(doc, COLORS.darkText);
+        doc.text(`Visual Aid #${idx + 1} (Educational Illustration)`, 68, currentY + 6);
+
+        try {
+          // Centered image inside the card block: width 132mm, height 74mm.
+          // PDF content starts around X = 14mm, page is 210mm wide.
+          // Drawing at X = 39mm, Y = currentY + 12mm fits perfectly.
+          doc.addImage(imgItem.text, 'JPEG', 39, currentY + 12, 132, 74);
+        } catch (e) {
+          console.error("Error embedding image into PDF:", e);
+        }
+
+        currentY += 94 + 6;
+      }
+    });
+  }
+
   // Fallback if absolutely no content was successfully parsed (raw sequential text block cards)
-  const isAnythingParsed = parsed.mcqs.length > 0 || parsed.shorts.length > 0 || parsed.longs.length > 0 || parsed.lessons.length > 0;
+  const isAnythingParsed = parsed.mcqs.length > 0 || parsed.shorts.length > 0 || parsed.longs.length > 0 || parsed.lessons.length > 0 || imageItems.length > 0;
   if (!isAnythingParsed && content.length > 0) {
     let cardTextBodyList: string[] = [];
     let cardTitle = title;

@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import Groq from "groq-sdk";
+import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -211,6 +212,39 @@ async function startServer() {
     }
   });
 
+  // Tool 7.5: Search Diagrams on Pexels using Pexels API
+  app.get("/api/pexels-search", async (req, res) => {
+    const { query, per_page } = req.query;
+    if (!query) {
+      return res.status(400).json({ error: "Search query is required." });
+    }
+
+    const apiKey = process.env.PEXELS_API_KEY;
+    if (!apiKey) {
+      return res.status(400).json({ error: "Pexels API key is not configured on this server. Please define PEXELS_API_KEY in your environment variables." });
+    }
+
+    try {
+      const fetchUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query as string)}&per_page=${per_page || 12}`;
+      const response = await fetch(fetchUrl, {
+        headers: {
+          "Authorization": apiKey
+        }
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        return res.status(response.status).json({ error: `Pexels API responded with error: ${errText}` });
+      }
+
+      const data = await response.json();
+      res.json(data);
+    } catch (error: any) {
+      console.error("Pexels Search Error:", error);
+      res.status(500).json({ error: "Failed to search photos on Pexels." });
+    }
+  });
+
   // Tool 7: Visual Analysis using Groq API (supporting client-side Text extraction for PDFs & Vision for Images)
   app.post("/api/visual-analysis", async (req, res) => {
     const { fileDataList, fileData, mimeType, task, classLevel, instructions, userKey, pdfText, language } = req.body;
@@ -305,30 +339,42 @@ Ensure you output ONLY the valid JSON object.`;
 
         rawText = chatCompletion.choices[0]?.message?.content || "";
       } else if (fileData) {
-        // Vision Strategy for Images (as instructed by the user)
-        const promptText = `Class Level parameter: ${classLevel}\n\nTask instructions:\n${targetPrompt}`;
+        // Vision Strategy for Images (using Gemini API as explicitly requested: Gemini for images, Groq for text)
+        if (!process.env.GEMINI_API_KEY) {
+          throw new Error("GEMINI_API_KEY environment variable is not set. Please add it to your environment variables / secrets panel.");
+        }
 
-        const chatCompletion = await groqClient.chat.completions.create({
-          messages: [
-            { role: "system", content: systemPrompt },
-            {
-              role: "user",
-              content: [
-                { type: "text", text: promptText },
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: `data:${mimeType || "image/jpeg"};base64,${fileData}`
-                  }
-                }
-              ]
+        const aiClient = new GoogleGenAI({
+          apiKey: process.env.GEMINI_API_KEY,
+          httpOptions: {
+            headers: {
+              'User-Agent': 'aistudio-build',
             }
-          ],
-          model: "llama-3.2-11b-vision-preview",
-          response_format: isJsonOutput ? { type: "json_object" } : undefined,
+          }
         });
 
-        rawText = chatCompletion.choices[0]?.message?.content || "";
+        const promptText = `Class Level parameter: ${classLevel}\n\nTask instructions:\n${targetPrompt}`;
+
+        const imagePart = {
+          inlineData: {
+            mimeType: mimeType || "image/jpeg",
+            data: fileData,
+          },
+        };
+        const textPart = {
+          text: promptText,
+        };
+
+        const response = await aiClient.models.generateContent({
+          model: "gemini-3.5-flash",
+          contents: [imagePart, textPart],
+          config: {
+            systemInstruction: systemPrompt,
+            responseMimeType: isJsonOutput ? "application/json" : undefined,
+          }
+        });
+
+        rawText = response.text || "";
       } else {
         return res.status(400).json({ error: "No PDF text or Image data detected. Please upload a valid document or wait for conversion." });
       }
