@@ -44,6 +44,29 @@ async function startServer() {
     return content;
   }
 
+  // Helper for Groq raw non-JSON completion
+  async function getGroqRawCompletion(prompt: string, systemPrompt?: string) {
+    if (!groq) {
+      throw new Error("GROQ_API_KEY is not configured. Please add it to your secrets.");
+    }
+
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: systemPrompt || "You are a helpful educational assistant.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      model: "llama-3.3-70b-versatile",
+    });
+    
+    return chatCompletion.choices[0].message.content || "";
+  }
+
   // --- API Routes ---
 
   // Tool 1: MCQ Generator
@@ -212,7 +235,44 @@ async function startServer() {
     }
   });
 
-  // Tool 7.5: Search Diagrams on Pexels using Pexels API
+  // Tool 7.5: Generate scientifically-accurate educational SVG diagram using Groq Llama API instead of Gemini
+  app.post("/api/generate-diagram", async (req, res) => {
+    const { topic } = req.body;
+    if (!topic) {
+      return res.status(400).json({ error: "Topic/diagram description is required." });
+    }
+
+    try {
+      const promptText = `Create a beautiful, modern, scientifically and educationally accurate, and highly detailed visual vector SVG diagram representing the concept: "${topic}".
+      Theme color guidelines: Must use a beautiful green-and-white academic theme. Background must be transparent or very soft white (#FFFFFF) with rounded rect card borders.
+      Accent colors to use: Forest green (#064E3B), emerald/mint (#10B981, #059669), and light mint (#E6F7F0).
+      
+      SVG Guidelines:
+      1. Output ONLY valid, clean SVG tags. No markdown formatting, no backticks, no wrap, no introductory text. Just raw parseable XML/SVG string.
+      2. Ensure it has viewBox="0 0 800 500" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg".
+      3. Draw highly detailed, clearly labeled diagram parts (using <text> tags with standard sans-serif font-family like 'system-ui', 'helvetica' or 'Inter' and appropriate color labels so they contrast perfectly).
+      4. Use shapes (<circle>, <rect>, <path>, <ellipse>, <line>) and nice arrows (using marker-end markers or arrow shapes) to show mechanisms, flows, or structural components.
+      5. Make sure the labels and annotations are spelled correctly.
+      6. All SVG tags must be perfectly matching and well-formed XML to prevent parsing issues in browser and PDF conversions.`;
+
+      const rawSvg = await getGroqRawCompletion(promptText, "You are an expert academic illustrator specializing in drawing perfect SVG/XML diagrams. Output strictly the raw SVG string starting with <svg> and ending with </svg> and nothing else. No explanation, no backticks, no markdown.");
+      let cleanedSvg = rawSvg.trim();
+      cleanedSvg = cleanedSvg.replace(/```xml\s*/gi, "").replace(/```svg\s*/gi, "").replace(/```html\s*/gi, "").replace(/```\s*/gi, "").trim();
+
+      const startIdx = cleanedSvg.indexOf("<svg");
+      const endIdx = cleanedSvg.lastIndexOf("</svg>");
+      if (startIdx !== -1 && endIdx !== -1) {
+        cleanedSvg = cleanedSvg.substring(startIdx, endIdx + 6);
+      }
+
+      res.json({ svg: cleanedSvg });
+    } catch (error: any) {
+      console.error("Groq Diagram Generation Error:", error);
+      res.status(500).json({ error: "Failed to generate science diagram with Groq API." });
+    }
+  });
+
+  // Secure Pexels Search API proxy
   app.get("/api/pexels-search", async (req, res) => {
     const { query, per_page } = req.query;
     if (!query) {
@@ -221,27 +281,29 @@ async function startServer() {
 
     const apiKey = process.env.PEXELS_API_KEY;
     if (!apiKey) {
-      return res.status(400).json({ error: "Pexels API key is not configured on this server. Please define PEXELS_API_KEY in your environment variables." });
+      return res.status(400).json({ error: "PEXELS_API_KEY is not configured on this server. Please setup PEXELS_API_KEY in your env secrets." });
     }
 
     try {
-      const fetchUrl = `https://api.pexels.com/v1/search?query=${encodeURIComponent(query as string)}&per_page=${per_page || 12}`;
-      const response = await fetch(fetchUrl, {
+      const perPage = per_page || 12;
+      const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(String(query))}&per_page=${perPage}`;
+      
+      const pexelsResponse = await fetch(url, {
         headers: {
-          "Authorization": apiKey
+          Authorization: apiKey
         }
       });
 
-      if (!response.ok) {
-        const errText = await response.text();
-        return res.status(response.status).json({ error: `Pexels API responded with error: ${errText}` });
+      if (!pexelsResponse.ok) {
+        const errText = await pexelsResponse.text();
+        return res.status(pexelsResponse.status).json({ error: `Pexels API error: ${errText}` });
       }
 
-      const data = await response.json();
+      const data = await pexelsResponse.json();
       res.json(data);
     } catch (error: any) {
       console.error("Pexels Search Error:", error);
-      res.status(500).json({ error: "Failed to search photos on Pexels." });
+      res.status(500).json({ error: error.message || "Failed to search images from Pexels" });
     }
   });
 
@@ -284,7 +346,7 @@ Each question object MUST have:
 - "options" (array of exactly 4 strings)
 - "correctIndex" (integer 0 to 3)
 - "explanation" (string explaining why)
-
+- 
 Ensure you output ONLY the valid JSON object.`;
       } else if (task === "short-questions") {
         targetPrompt = `Extract the educational concepts from this document and generate exactly 5 short-answer concept-check questions targeting the ${classLevel} level.
@@ -292,7 +354,7 @@ You MUST format your output as a clean, parseable JSON object with a "questions"
 Each question object MUST contain:
 - "question" (string)
 - "modelAnswer" (string, a concise 2-3 sentence reference model answer)
-
+- 
 Ensure you output ONLY the valid JSON.`;
       } else if (task === "exam-paper") {
         targetPrompt = `Synthesize the educational materials from this document and compile a complete structured academic exam paper designed for the ${classLevel} level.
@@ -300,13 +362,13 @@ The exam paper MUST contain the following sections:
 - 5 MCQs
 - 3 Short Questions
 - 1 Long essay-style Question
-
+- 
 You MUST format your output as a clean, parseable JSON object with exactly the three keys below:
 - "mcqs": an array of 5 MCQ objects (each with question, options, correctIndex, explanation)
 - "shortQuestions": an array of 3 short questions (each with question, modelAnswer)
 - "longQuestions": an array of 1 long question (with question, modelAnswer (a detailed multi-paragraph model essay response with heading subheaders), keyPoints (an array of exactly 5 bullet points to check/grade)).
-
-Ensure you output ONLY the valid JSON object.`;
+- 
+You MUST format your output as a clean, parseable JSON object.`;
       } else {
         return res.status(400).json({ error: `Unsupported task: ${task}` });
       }
@@ -339,42 +401,28 @@ Ensure you output ONLY the valid JSON object.`;
 
         rawText = chatCompletion.choices[0]?.message?.content || "";
       } else if (fileData) {
-        // Vision Strategy for Images (using Gemini API as explicitly requested: Gemini for images, Groq for text)
-        if (!process.env.GEMINI_API_KEY) {
-          throw new Error("GEMINI_API_KEY environment variable is not set. Please add it to your environment variables / secrets panel.");
-        }
-
-        const aiClient = new GoogleGenAI({
-          apiKey: process.env.GEMINI_API_KEY,
-          httpOptions: {
-            headers: {
-              'User-Agent': 'aistudio-build',
+        // Vision Strategy for Images using Groq Vision API
+        const chatCompletion = await groqClient.chat.completions.create({
+          messages: [
+            { role: "system", content: systemPrompt },
+            {
+              role: "user",
+              content: [
+                { type: "text", text: `Class Level parameter: ${classLevel}\n\nTask instructions:\n${targetPrompt}` },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:${mimeType || "image/jpeg"};base64,${fileData}`
+                  }
+                }
+              ]
             }
-          }
+          ],
+          model: "llama-3.2-11b-vision-preview",
+          response_format: isJsonOutput ? { type: "json_object" } : undefined,
         });
 
-        const promptText = `Class Level parameter: ${classLevel}\n\nTask instructions:\n${targetPrompt}`;
-
-        const imagePart = {
-          inlineData: {
-            mimeType: mimeType || "image/jpeg",
-            data: fileData,
-          },
-        };
-        const textPart = {
-          text: promptText,
-        };
-
-        const response = await aiClient.models.generateContent({
-          model: "gemini-3.5-flash",
-          contents: [imagePart, textPart],
-          config: {
-            systemInstruction: systemPrompt,
-            responseMimeType: isJsonOutput ? "application/json" : undefined,
-          }
-        });
-
-        rawText = response.text || "";
+        rawText = chatCompletion.choices[0]?.message?.content || "";
       } else {
         return res.status(400).json({ error: "No PDF text or Image data detected. Please upload a valid document or wait for conversion." });
       }

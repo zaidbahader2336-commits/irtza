@@ -4,11 +4,35 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+  
+  --color-primary-dark: #064E3B;
+  --color-primary-light: #E6F7F0;
+  --color-accent-mint: #19CE86;
+  --color-accent-emerald: #059669;
+  
+  /* Override Indigo classes for automatic backward compatibility in theme swapping */
+  --color-indigo-50: #FAFCFA;
+  --color-indigo-100: #E6F7F0;
+  --color-indigo-205: #D1FAE5;
+  --color-indigo-500: #10B981;
+  --color-indigo-600: #059669;
+  --color-indigo-700: #047857;
+  --color-indigo-800: #064E3B;
+  --color-indigo-900: #022C22;
+  
+  /* Override Blue classes for automatic backward compatibility in theme swapping */
+  --color-blue-50: #FAFCFA;
+  --color-blue-100: #E6F7F0;
+  --color-blue-500: #10B981;
+  --color-blue-600: #059669;
+  --color-blue-700: #047857;
+  --color-blue-800: #064E3B;
+  --color-blue-900: #022C22;
 }
 
 @layer base {
   body {
-    @apply bg-[#F8FAFF] text-[#0F172A];
+    @apply bg-[#FAFDFB] text-[#0F172A];
   }
 }
 
@@ -22,7 +46,7 @@
 }
 
 .shimmer {
-  background: linear-gradient(90deg, #F1F5F9 25%, #E2E8F0 50%, #F1F5F9 75%);
+  background: linear-gradient(90deg, #FAFCFA 25%, #E6F7F0 50%, #FAFCFA 75%);
   background-size: 200% 100%;
   animation: shimmer 1.8s infinite linear;
 }

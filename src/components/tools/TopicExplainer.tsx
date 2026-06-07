@@ -79,10 +79,10 @@ export default function TopicExplainer({ onDownload }: Props) {
   const [loading, setLoading] = useState(false);
   const [explanation, setExplanation] = useState<TopicExplanation | null>(null);
 
-  // Pexels API integration states
-  const [pexelsPhotos, setPexelsPhotos] = useState<any[]>([]);
-  const [pexelsQuery, setPexelsQuery] = useState('');
-  const [pexelsLoading, setPexelsLoading] = useState(false);
+  // Gemini Diagram integration states
+  const [generatedDiagramSvg, setGeneratedDiagramSvg] = useState<string>('');
+  const [pexelsQuery, setPexelsQuery] = useState(''); // Hold diagram search term
+  const [pexelsLoading, setPexelsLoading] = useState(false); // Map selector to same name
   const [pexelsError, setPexelsError] = useState<string | null>(null);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
 
@@ -102,36 +102,30 @@ export default function TopicExplainer({ onDownload }: Props) {
   const getSuggestedTags = () => {
     if (!topic) return [];
     const base = cleanQueryText(topic);
-    if (!base) return ['educational diagram', 'science science'];
+    if (!base) return ['educational diagram', 'science study'];
 
     const tags = [base];
     const lower = base.toLowerCase();
 
     // Dynamically design smart textbook queries depending on matched academic domains
     if (lower.includes('cell') || lower.includes('bio') || lower.includes('plant') || lower.includes('animal') || lower.includes('mitosis') || lower.includes('chloroplast') || lower.includes('photic') || lower.includes('photosynthesis')) {
-      tags.push(`${base} cell biology`);
-      tags.push("biology diagram model");
-      tags.push("laboratory science");
+      tags.push(`${base} cell structure`);
+      tags.push("biological process mechanism");
     } else if (lower.includes('heart') || lower.includes('brain') || lower.includes('body') || lower.includes('muscle') || lower.includes('organ') || lower.includes('anatomy') || lower.includes('bone') || lower.includes('eye')) {
-      tags.push(`${base} anatomy`);
-      tags.push("medical blueprint");
-      tags.push("human organ model");
+      tags.push(`${base} flow chart`);
+      tags.push("anatomy schematic");
     } else if (lower.includes('atom') || lower.includes('molecule') || lower.includes('chem') || lower.includes('acid') || lower.includes('bond') || lower.includes('reaction')) {
-      tags.push(`${base} molecular model`);
-      tags.push("chemistry concept");
-      tags.push("atomic schematic");
+      tags.push(`${base} molecular bonds`);
+      tags.push("chemistry concept cycle");
     } else if (lower.includes('earth') || lower.includes('planet') || lower.includes('star') || lower.includes('space') || lower.includes('solar') || lower.includes('orbit')) {
-      tags.push(`${base} solar system`);
-      tags.push("planetary scheme");
-      tags.push("space textbook graphic");
+      tags.push(`${base} solar orbits`);
+      tags.push("space system scheme");
     } else {
-      // General science topics
-      tags.push(`${base} diagram model`);
-      tags.push(`${base} illustration schematic`);
-      tags.push("scientific visual aid");
+      tags.push(`${base} concept flow`);
+      tags.push("scientific concept cycle");
     }
 
-    return Array.from(new Set(tags)).filter(t => t && t.trim().length > 2).slice(0, 5);
+    return Array.from(new Set(tags)).filter(t => t && t.trim().length > 2).slice(0, 4);
   };
 
   const fetchPexelsDiagrams = async (searchTerm: string) => {
@@ -139,40 +133,24 @@ export default function TopicExplainer({ onDownload }: Props) {
     setPexelsLoading(true);
     setPexelsError(null);
     try {
-      const res = await fetch(`/api/pexels-search?query=${encodeURIComponent(searchTerm)}&per_page=12`);
+      const res = await fetch('/api/generate-diagram', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: searchTerm }),
+      });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "Failed to fetch images from Pexels.");
+        throw new Error(data.error || "Failed to generate SVG visual illustration.");
       }
       
-      let photos = data.photos || [];
-
-      // Smart Broad Fallback if 0 results
-      if (photos.length === 0) {
-        let fallbackTerm = "science diagram";
-        const lower = searchTerm.toLowerCase();
-        if (lower.includes('cell') || lower.includes('bio') || lower.includes('plant') || lower.includes('animal') || lower.includes('mitosis') || lower.includes('photosynthesis')) {
-          fallbackTerm = "biology model";
-        } else if (lower.includes('heart') || lower.includes('brain') || lower.includes('body') || lower.includes('anatomy') || lower.includes('bone') || lower.includes('kidney') || lower.includes('liver')) {
-          fallbackTerm = "human anatomy model";
-        } else if (lower.includes('atom') || lower.includes('molecular') || lower.includes('chem') || lower.includes('reaction') || lower.includes('acid') || lower.includes('element')) {
-          fallbackTerm = "chemistry formula illustration";
-        } else if (lower.includes('space') || lower.includes('star') || lower.includes('planet') || lower.includes('system') || lower.includes('solar') || lower.includes('orbit')) {
-          fallbackTerm = "solar system space";
-        }
-
-        console.warn(`0 results for "${searchTerm}", trying fallback search: "${fallbackTerm}"`);
-        const fallbackRes = await fetch(`/api/pexels-search?query=${encodeURIComponent(fallbackTerm)}&per_page=12`);
-        const fallbackData = await fallbackRes.json();
-        if (fallbackRes.ok && fallbackData.photos && fallbackData.photos.length > 0) {
-          photos = fallbackData.photos;
-        }
+      if (data && data.svg) {
+        setGeneratedDiagramSvg(data.svg);
+      } else {
+        throw new Error("No SVG visual markup was outputted from the diagram API.");
       }
-
-      setPexelsPhotos(photos);
     } catch (err: any) {
       console.error(err);
-      setPexelsError(err.message || "Unable to load diagrams from Pexels.");
+      setPexelsError(err.message || "Unable to generate diagram using Gemini. Please try again.");
     } finally {
       setPexelsLoading(false);
     }
@@ -181,6 +159,8 @@ export default function TopicExplainer({ onDownload }: Props) {
   const generateExplanation = async () => {
     if (!topic.trim()) return;
     setLoading(true);
+    setGeneratedDiagramSvg(''); // clear previous diagram
+    setPexelsError(null);
     try {
       const res = await fetch('/api/explain-topic', {
         method: 'POST',
@@ -198,9 +178,9 @@ export default function TopicExplainer({ onDownload }: Props) {
         setExplanation(data);
         saveToUserHistory('explanations', topic, data);
 
-        // Fetch Pexels Diagrams automatically for this topic
+        // Fetch Gemini SVG Diagram automatically for this topic
         const cleanTopic = cleanQueryText(topic);
-        const initialQuery = cleanTopic ? `${cleanTopic} science` : "educational science";
+        const initialQuery = cleanTopic ? `${cleanTopic} conceptual flow` : "educational schematic";
         setPexelsQuery(initialQuery);
         fetchPexelsDiagrams(initialQuery);
       } else {
@@ -243,25 +223,18 @@ export default function TopicExplainer({ onDownload }: Props) {
           content.push({ type: 'text' as const, text: `[!] ${m}` });
         });
 
-        // Convert and include top 2 Pexels Photos into the PDF report
-        if (pexelsPhotos && pexelsPhotos.length > 0) {
-          const maxPhotosToInclude = Math.min(2, pexelsPhotos.length);
-          for (let i = 0; i < maxPhotosToInclude; i++) {
-            const photo = pexelsPhotos[i];
-            const imgUrl = photo.src.medium;
-            try {
-              const base64Data = await convertUrlToBase64(imgUrl);
-              content.push({
-                type: 'image',
-                text: base64Data, // Embed the base64-encoded visual aid
-              });
-            } catch (err) {
-              console.error(`Failed to convert Pexels image ${i} to base64:`, err);
-            }
-          }
+        // Embed Gemini-generated vector SVG diagram into slides
+        if (generatedDiagramSvg) {
+          content.push({
+            type: 'image',
+            text: generatedDiagramSvg,
+          });
         }
 
-        await generatePDF(`${explanation.title} Lesson`, content);
+        await generatePDF(`${explanation.title} Lesson`, content, {
+          language,
+          gradeLevel
+        });
         onDownload(`${explanation.title} Lesson`);
       } catch (err) {
         console.error("PDF generation layout error:", err);
@@ -274,20 +247,20 @@ export default function TopicExplainer({ onDownload }: Props) {
   if (loading) {
     return (
       <div className="grid grid-cols-12 gap-8 h-full animate-pulse">
-        <div className="col-span-12 lg:col-span-4 space-y-6">
-          <div className="bg-white rounded-2xl border border-[#E2E8F0] p-6 shadow-sm shimmer h-72" />
+        <div className="col-span-12 lg:col-span-4 space-y-4">
+          <div className="bg-white rounded-2xl border border-emerald-100 p-6 shadow-sm shimmer h-72 animate-pulse" />
         </div>
-        <div className="col-span-12 lg:col-span-8 flex flex-col justify-center items-center py-20 bg-white rounded-2xl border border-[#E2E8F0] shadow-sm p-10 text-center space-y-6">
+        <div className="col-span-12 lg:col-span-8 flex flex-col justify-center items-center py-20 bg-white rounded-2xl border border-emerald-100 shadow-sm p-10 text-center space-y-6">
           <div className="flex gap-2.5 justify-center items-center">
-            <span className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce" />
-            <span className="w-3 h-3 bg-blue-500 rounded-full animate-bounce delay-100" />
-            <span className="w-3 h-3 bg-[#F59E0B] rounded-full animate-bounce delay-200" />
+            <span className="w-3.5 h-3.5 bg-emerald-600 rounded-full animate-bounce" />
+            <span className="w-3.5 h-3.5 bg-emerald-400 rounded-full animate-bounce delay-100" />
+            <span className="w-3.5 h-3.5 bg-teal-500 rounded-full animate-bounce delay-200" />
           </div>
-          <h3 className="text-lg font-bold text-gray-700">Deconstructing topic...</h3>
-          <p className="text-sm text-gray-400 max-w-xs">Building analogies and mapping critical misconceptions.</p>
-          <div className="w-full max-w-md space-y-4">
-            <div className="shimmer h-14 rounded-xl" />
-            <div className="shimmer h-24 rounded-xl" />
+          <h3 className="text-lg font-bold text-emerald-800">Deconstructing topic...</h3>
+          <p className="text-xs text-emerald-605 m-0.5 leading-relaxed">Building lesson structures, analogies and rendering vector SVG whiteboard slides with Gemini...</p>
+          <div className="w-full max-w-md space-y-3">
+            <div className="shimmer h-12 rounded-xl" />
+            <div className="shimmer h-20 rounded-xl" />
           </div>
         </div>
       </div>
@@ -297,23 +270,31 @@ export default function TopicExplainer({ onDownload }: Props) {
   if (!explanation) {
     return (
       <div className="grid grid-cols-12 gap-8 h-full animate-in fade-in duration-300">
-        <div className="col-span-12 lg:col-span-4 bg-white rounded-2xl border border-[#E2E8F0] p-8 flex flex-col shadow-sm">
-          <h2 className="text-lg font-bold text-[#0F172A] mb-6">Quick Unlock</h2>
-          
-          <div className="space-y-6 flex-1">
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-[#64748B] uppercase tracking-wider pl-1">Topic</label>
-              <input 
-                type="text" 
+        {/* Left Control Column */}
+        <div className="col-span-12 lg:col-span-4 bg-white rounded-2xl border border-[#E2E8F0] p-6 flex flex-col shadow-sm">
+          <div className="flex items-center gap-2.5 mb-6">
+            <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
+              <Book size={20} />
+            </div>
+            <div className="text-left">
+              <h2 className="text-sm font-black text-gray-800 tracking-tight leading-none uppercase">Topic Explainer</h2>
+              <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Lesson Deck Maker</span>
+            </div>
+          </div>
+
+          <div className="space-y-4 flex-1">
+            <div className="space-y-1.5 text-left">
+              <label className="text-[10px] font-black uppercase tracking-wider pl-1 text-[#64748B]">Target Concept / Term</label>
+              <textarea
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                placeholder="e.g. Quantum Physics, SEO, Photosynthesis..."
-                className="w-full h-11 px-4 py-3 bg-[#F8FAFF] border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#6366F1] focus:ring-3 focus:ring-[#6366F1]/10 transition-all text-sm font-medium text-gray-800 placeholder-[#94A3B8]"
+                placeholder="Enter any complex term (e.g. photosynthesis, black hole, quantum tunneling, mitosis)..."
+                className="w-full text-xs font-semibold text-slate-700 placeholder-[#94A3B8] p-3.5 bg-slate-50 border border-[#E2E8F0] rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-3 focus:ring-emerald-500/10 transition-all min-h-24 resize-none leading-relaxed"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-[#64748B] uppercase tracking-wider pl-1">Detail level</label>
+            <div className="space-y-1.5 text-left">
+              <label className="text-[10px] font-black uppercase tracking-wider pl-1 text-[#64748B]">Depth Level</label>
               <div className="flex gap-2">
                 {['Beginner', 'Intermediate', 'Advanced'].map(l => (
                   <button
@@ -321,10 +302,10 @@ export default function TopicExplainer({ onDownload }: Props) {
                     type="button"
                     onClick={() => setLevel(l)}
                     className={cn(
-                      "flex-1 h-10 rounded-lg text-xs font-bold border transition-all cursor-pointer",
+                      "flex-1 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer",
                       level === l 
-                        ? "bg-white border-[#F59E0B] text-[#D97706] shadow-sm shadow-amber-50" 
-                        : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-amber-50/40"
+                        ? "bg-[#E6F4ED] border-emerald-300 text-[#047857]" 
+                        : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-emerald-50/25"
                     )}
                   >
                     {l}
@@ -333,12 +314,12 @@ export default function TopicExplainer({ onDownload }: Props) {
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-[#64748B] uppercase tracking-wider pl-1">Target Grade Level</label>
+            <div className="space-y-1.5 text-left">
+              <label className="text-[10px] font-black uppercase tracking-wider pl-1 text-[#64748B]">Target Grade Level</label>
               <select
                 value={gradeLevel}
                 onChange={(e) => setGradeLevel(e.target.value)}
-                className="w-full h-11 px-4 py-2 bg-[#F8FAFF] border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#6366F1] focus:ring-3 focus:ring-[#6366F1]/10 text-sm font-medium text-gray-800"
+                className="w-full py-2.5 px-3 bg-slate-50 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-emerald-500 text-xs font-bold text-slate-700"
               >
                 {GRADE_LEVELS.map(g => (
                   <option key={g} value={g}>{g}</option>
@@ -346,12 +327,12 @@ export default function TopicExplainer({ onDownload }: Props) {
               </select>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold text-[#64748B] uppercase tracking-wider pl-1">Target Language</label>
+            <div className="space-y-1.5 text-left">
+              <label className="text-[10px] font-black uppercase tracking-wider pl-1 text-[#64748B]">Target Language</label>
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="w-full h-11 px-4 py-2 bg-[#F8FAFF] border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-[#6366F1] focus:ring-3 focus:ring-[#6366F1]/10 text-sm font-medium text-gray-800"
+                className="w-full py-2.5 px-3 bg-slate-50 border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-emerald-500 text-xs font-bold text-slate-700"
               >
                 {LANGUAGES.map(lang => (
                   <option key={lang} value={lang}>{lang}</option>
@@ -361,110 +342,140 @@ export default function TopicExplainer({ onDownload }: Props) {
 
             <button 
               onClick={generateExplanation}
-              disabled={!topic}
-              className="w-full h-11 bg-gradient-to-r from-[#6366F1] to-[#3B82F6] hover:brightness-105 hover:scale-[1.01] active:scale-[0.98] text-white font-bold text-sm rounded-lg shadow-md transition-all mt-4 disabled:opacity-40 disabled:pointer-events-none"
+              disabled={!topic.trim() || loading}
+              className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm rounded-xl shadow-md transition-all mt-4 disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer"
             >
-              Explain This
+              <Sparkles size={16} />
+              Construct Landscape Slides
             </button>
           </div>
         </div>
 
-        {/* Right Empty State */}
-        <div className="col-span-12 lg:col-span-8 bg-white rounded-2xl border border-dashed border-[#E2E8F0] flex flex-col items-center justify-center p-12 text-center shadow-sm">
-            <div className="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center mb-6">
-                <Lightbulb size={32} className="text-[#F59E0B] animate-pulse" />
-            </div>
-            <h3 className="text-[#0F172A] text-xl font-extrabold tracking-tight">Ready to explain your Topic</h3>
-            <p className="text-[#64748B] mt-2 max-w-sm text-sm font-medium">
-              Understand complex academic fields using high-impact metaphors, cheat blueprints, and diagnostic pitfall tips. Define your request to begin.
-            </p>
-            <div className="mt-6 flex items-center gap-1.5 text-[#F59E0B] text-xs font-bold">
-              <span>Use parameters config panel on the left</span>
-              <ArrowRight size={14} className="animate-bounce" />
-            </div>
+        {/* Right Empty Preview State */}
+        <div className="col-span-12 lg:col-span-8 bg-[#FAFAF8]/40 rounded-2xl border-2 border-dashed border-emerald-250 flex flex-col items-center justify-center p-12 text-center shadow-3xs min-h-[450px]">
+          <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mb-6 shadow-4xs animate-pulse">
+            <Book size={30} className="text-emerald-600 animate-pulse" />
+          </div>
+          <h3 className="text-[#064E3B] text-lg font-black tracking-tight uppercase">Ready to explain your Topic</h3>
+          <p className="text-emerald-800/60 mt-2 max-w-sm text-xs font-semibold leading-relaxed">
+            Enter any topic or concept. We'll decompose it into landscape PowerPoint-style slides, rich analogies, visual structures, common misconceptions, and generate an on-demand custom SVG vector whiteboard diagram!
+          </p>
+          <div className="mt-8 flex items-center gap-1.5 text-emerald-600 text-xs font-black">
+            <span>Use config panel on the left to start</span>
+            <span className="animate-bounce">→</span>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 pb-20 animate-in fade-in duration-300">
-      <div className="flex items-center justify-between">
-        <button 
-          onClick={() => setExplanation(null)} 
-          className="text-xs font-bold text-[#6366F1] hover:underline bg-[#6366F1]/5 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all"
-        >
-          ← Different Topic
-        </button>
-        <button 
-          onClick={handleDownload} 
-          disabled={downloadingPDF}
-          className="flex items-center gap-2 text-xs font-bold text-[#64748B] hover:text-[#3B82F6] transition-colors border border-[#E2E8F0] rounded-lg px-4 py-1.5 bg-white cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {downloadingPDF ? (
-            <>
-              <span className="w-3.5 h-3.5 border-2 border-slate-300 border-t-indigo-600 rounded-full animate-spin shrink-0" />
-              Embedding Visuals...
-            </>
-          ) : (
-            <>
-              <Download size={14} />
-              Save as Lesson PDF
-            </>
-          )}
-        </button>
-      </div>
-
-      <div className="space-y-8">
-        {/* Title & Summary */}
-        <div className="space-y-4">
-          <div className="flex flex-col gap-1">
-            <span className="text-[9px] font-black uppercase tracking-widest text-[#6366F1]">Concept Dossier</span>
-            <h2 className="text-2xl font-black text-[#0F172A] tracking-tight">{explanation.title}</h2>
+    <div className="grid grid-cols-12 gap-8 animate-in fade-in duration-300 text-left">
+      {/* Left panel metadata & controllers */}
+      <div className="col-span-12 lg:col-span-4 bg-white rounded-2xl border border-[#E2E8F0] p-6 shadow-sm space-y-4 self-start">
+        <div className="flex items-center gap-3 border-b border-gray-105 pb-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-xs">
+            <Book size={20} />
           </div>
-          <div className="p-6 rounded-xl bg-white border border-[#E2E8F0] shadow-sm relative overflow-hidden pl-10">
-            <div className="absolute top-0 left-0 w-2.5 h-full bg-[#6366F1]" />
-            <p className="text-base leading-relaxed text-[#1E293B] font-serif italic">
-              "{explanation.summary}"
-            </p>
+          <div className="text-left">
+            <h2 className="text-xs font-black text-gray-800 tracking-tight uppercase leading-none">Topic Explainer</h2>
+            <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">Lesson Complete</span>
           </div>
         </div>
 
-        {/* Foundations Map */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-blue-50 text-[#3B82F6] flex items-center justify-center shrink-0 shadow-sm">
-                <Book size={14} />
-              </div>
-              <h3 className="font-extrabold uppercase tracking-wider text-[10px] text-[#64748B]">Essential Foundations</h3>
+        <div className="space-y-4">
+          <div className="bg-[#FAFCFB] rounded-xl p-4 text-left border border-emerald-100 space-y-1.5">
+            <p className="text-[9px] font-extrabold uppercase tracking-widest text-emerald-700">Concept Scope</p>
+            <p className="text-xs font-extrabold text-[#064E3B] leading-snug">{explanation.title}</p>
+            <p className="text-[10px] font-bold text-emerald-600 leading-relaxed capitalize">
+              Targeted towards {gradeLevel.toLowerCase()} readers in {language}.
+            </p>
+          </div>
+
+          <button
+            onClick={handleDownload}
+            disabled={downloadingPDF}
+            className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center justify-center gap-2 transition-transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer shadow-md hover:shadow-lg disabled:opacity-50"
+          >
+            {downloadingPDF ? (
+              <span className="inline-flex items-center gap-1.5 font-bold">
+                <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                RENDERING SLIDES...
+              </span>
+            ) : (
+              <>
+                <Download size={14} />
+                DOWNLOAD LANDSCAPE SLIDES (PDF)
+              </>
+            )}
+          </button>
+
+          <button
+            onClick={() => setExplanation(null)}
+            className="w-full py-2.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all cursor-pointer border border-[#E2E8F0]"
+          >
+            Explain Another Concept
+          </button>
+        </div>
+      </div>
+
+      {/* Right panel output detail & Slides Preview */}
+      <div className="col-span-12 lg:col-span-8 space-y-6">
+        {/* Core Lesson Information */}
+        <div className="bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-r from-emerald-50 to-green-50/40 p-5 border-b border-gray-100 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shadow-3xs">
+              <Lightbulb size={16} />
             </div>
-            
-            <div className="space-y-3">
-              {explanation.keyConcepts.map((c, i) => (
-                <div 
-                  key={i} 
-                  className="p-4 rounded-xl bg-white border border-[#E2E8F0] shadow-sm flex items-start gap-3 group hover:border-[#6366F1] transition-all duration-150"
-                >
-                  <ArrowRightCircle size={16} className="text-[#6366F1] mt-0.5 shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                  <span className="text-xs font-bold text-gray-800 leading-normal">{c}</span>
-                </div>
-              ))}
+            <div>
+              <h3 className="font-extrabold text-sm text-gray-800 uppercase tracking-tight">Active Slides Presentation Preview</h3>
+              <p className="text-[11px] text-gray-400 font-medium font-sans">See the generated landscape presentation deck that will compile inside your PDF file.</p>
             </div>
           </div>
 
-          <div className="space-y-6">
+          <div className="p-6 space-y-6">
+            {/* Title & Exec Summary */}
+            <div className="space-y-2.5">
+              <h1 className="text-xl font-black text-[#047857] leading-tight tracking-tight">{explanation.title}</h1>
+              <p className="text-xs font-semibold text-slate-600 leading-relaxed text-justify bg-[#FAFCFB] p-4.5 border border-emerald-100 rounded-xl shadow-4xs">
+                {explanation.summary}
+              </p>
+            </div>
+
+            {/* Foundations */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
+                  <Book size={14} />
+                </div>
+                <h3 className="font-extrabold uppercase tracking-wider text-[10px] text-[#64748B]">Essential Foundations</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {explanation.keyConcepts.map((c, i) => (
+                  <div 
+                    key={i} 
+                    className="p-3.5 rounded-xl bg-white border border-emerald-100 flex items-start gap-2.5 shadow-3xs hover:border-emerald-300 transition-all text-left"
+                  >
+                    <ArrowRightCircle size={15} className="text-emerald-555 mt-0.5 shrink-0" />
+                    <span className="text-xs font-bold text-gray-800 leading-snug">{c}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-6">
              {/* Mental Model */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-amber-50 text-[#F59E0B] flex items-center justify-center shrink-0 shadow-sm">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
                   <Lightbulb size={14} />
                 </div>
-                <h3 className="font-extrabold uppercase tracking-wider text-[10px] text-[#64748B]">Mental Model Metaphor</h3>
+                <h3 className="font-extrabold uppercase tracking-wider text-[10px] text-[#64748B]">Real World Metaphor</h3>
               </div>
-              <div className="p-5 rounded-xl bg-amber-50/50 border border-amber-100 pl-6 relative">
-                <div className="absolute top-0 left-0 w-1 h-full bg-[#F59E0B] opacity-50" />
-                <p className="text-amber-900 text-xs font-semibold leading-relaxed">
+              <div className="p-5 rounded-xl bg-emerald-50/10 border border-emerald-100/60 pl-6 relative text-left">
+                <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500 opacity-50" />
+                <p className="text-emerald-950 text-xs font-semibold leading-relaxed">
                     {explanation.analogy}
                 </p>
               </div>
@@ -474,29 +485,15 @@ export default function TopicExplainer({ onDownload }: Props) {
             {explanation.detailedExplanation && (
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-500 flex items-center justify-center shrink-0 shadow-sm">
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
                     <FileText size={14} />
                   </div>
-                  <h3 className="font-extrabold uppercase tracking-wider text-[10px] text-[#64748B]">Deep Dive Analysis</h3>
+                  <h3 className="font-extrabold uppercase tracking-wider text-[10px] text-[#64748B]">Classroom Breakdown Detail</h3>
                 </div>
-                <div className="p-6 rounded-xl bg-white border border-[#E2E8F0] shadow-sm text-xs leading-relaxed text-gray-700">
-                  <ReactMarkdown>{explanation.detailedExplanation}</ReactMarkdown>
-                </div>
-              </div>
-            )}
-
-            {/* Diagram Description */}
-            {explanation.diagramDescription && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-500 flex items-center justify-center shrink-0 shadow-sm">
-                    <Layout size={14} />
+                <div className="p-5 rounded-xl bg-white border border-[#E2E8F0] shadow-sm text-xs leading-relaxed text-gray-700 text-justify">
+                  <div className="markdown-body">
+                    <ReactMarkdown>{explanation.detailedExplanation}</ReactMarkdown>
                   </div>
-                  <h3 className="font-extrabold uppercase tracking-wider text-[10px] text-[#64748B]">Visual Blueprint</h3>
-                </div>
-                <div className="p-5 rounded-xl bg-emerald-50/50 border border-emerald-100 text-xs leading-relaxed text-emerald-800">
-                  <p className="font-extrabold mb-1.5 text-emerald-950 uppercase tracking-widest text-[9px]">Recommended Visual Aid:</p>
-                  {explanation.diagramDescription}
                 </div>
               </div>
             )}
@@ -504,15 +501,15 @@ export default function TopicExplainer({ onDownload }: Props) {
             {/* Common Pitfalls - styled list */}
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center shrink-0 shadow-sm">
+                <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-550 flex items-center justify-center shrink-0 shadow-sm">
                   <AlertTriangle size={14} />
                 </div>
-                <h3 className="font-extrabold uppercase tracking-wider text-[10px] text-[#64748B]">Common Pitfalls</h3>
+                <h3 className="font-extrabold uppercase tracking-wider text-[10px] text-[#64748B]">Mistakes & Crucial Misconceptions</h3>
               </div>
               <div className="flex flex-col gap-2">
                 {explanation.misconceptions.map((m, i) => (
                   <div key={i} className="flex items-center gap-2.5 text-xs font-bold text-rose-800 bg-rose-50/40 px-4 py-2.5 rounded-lg border border-rose-100">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-400 shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-450 shrink-0" />
                     <span className="leading-snug">{m}</span>
                   </div>
                 ))}
@@ -520,28 +517,29 @@ export default function TopicExplainer({ onDownload }: Props) {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* PEXELS REFERENCE DIAGRAMS & VISUAL AIDS */}
+        {/* GEMINI DIAGRAMS & ILLUSTRATIONS (GREEN THEMED WHITEBOARD) */}
         {explanation && (
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.15 }}
-            className="mt-8 bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden text-left"
+            className="mt-8 bg-white border border-[#E2E8F0] rounded-2xl shadow-sm overflow-hidden"
           >
-            <div className="bg-gradient-to-r from-violet-50 to-indigo-50 p-6 border-b border-[#E2E8F0] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="bg-gradient-to-r from-emerald-50 to-green-50/40 p-6 border-b border-[#E2E8F0] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-violet-600/10 text-violet-600 flex items-center justify-center shadow-xs">
+                <div className="w-10 h-10 rounded-xl bg-emerald-600/10 text-emerald-600 flex items-center justify-center shadow-xs">
                   <ImageIcon size={20} />
                 </div>
                 <div>
-                  <h3 className="font-sans font-black text-slate-800 text-lg flex items-center gap-2">
-                    Pexels Reference Diagrams & Visual Aids
-                    <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase bg-violet-100 text-violet-600 px-2 py-0.5 rounded-full tracking-wider">
-                      Live Visuals
+                  <h3 className="font-sans font-black text-[#032F20] text-base flex flex-wrap items-center gap-2">
+                    Gemini Live Academic Diagram Writer
+                    <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase bg-emerald-100 text-emerald-700 border border-emerald-300 px-2.5 py-0.5 rounded-full tracking-wider">
+                      Vector SVG
                     </span>
                   </h3>
-                  <p className="text-slate-500 font-medium text-xs mt-0.5">Explore diagrams, schematic graphs, or illustrations for this topic to embed in your exported lesson.</p>
+                  <p className="text-emerald-800/70 font-semibold text-xs mt-0.5">Generate scientifically and educationally accurate conceptual whiteboard designs using Gemini on-demand.</p>
                 </div>
               </div>
             </div>
@@ -560,23 +558,23 @@ export default function TopicExplainer({ onDownload }: Props) {
                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                     <input
                       type="text"
-                      placeholder="Search diagrams on Pexels (e.g. human heart, plant cell)..."
+                      placeholder="Specify a diagram topic to draw (e.g. water cycle, heart diagram, food chain)..."
                       value={pexelsQuery}
                       onChange={(e) => setPexelsQuery(e.target.value)}
-                      className="w-full text-xs font-semibold text-slate-700 placeholder-[#94A3B8] pl-10 pr-4 py-3 bg-slate-50 border border-[#E2E8F0] rounded-xl focus:outline-none focus:border-violet-500 focus:ring-3 focus:ring-violet-500/10 transition-all leading-normal text-sm"
+                      className="w-full text-xs font-semibold text-slate-700 placeholder-[#94A3B8] pl-10 pr-4 py-3 bg-slate-50 border border-[#E2E8F0] rounded-xl focus:outline-none focus:border-emerald-500 focus:ring-3 focus:ring-emerald-500/10 transition-all leading-normal"
                     />
                   </div>
                   <button
                     type="submit"
                     disabled={pexelsLoading}
-                    className="px-5 py-3 text-xs font-black rounded-xl bg-violet-600 hover:bg-violet-750 text-white flex items-center gap-1.5 transition-colors shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50"
+                    className="px-5 py-3 text-xs font-black rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1.5 transition-colors shadow-xs hover:shadow-md cursor-pointer disabled:opacity-50 shrink-0"
                   >
                     {pexelsLoading ? (
                       <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
-                      <Search size={14} />
+                      <Sparkles size={14} className="animate-pulse" />
                     )}
-                    Search
+                    Render Diagram
                   </button>
                 </form>
 
@@ -595,8 +593,8 @@ export default function TopicExplainer({ onDownload }: Props) {
                         className={cn(
                           "px-3 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer shadow-3xs",
                           pexelsQuery === tag
-                            ? "bg-violet-50 border-violet-200 text-violet-600"
-                            : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-slate-50"
+                            ? "bg-emerald-50 border-emerald-200 text-emerald-600"
+                            : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-[#F2FAF6]"
                         )}
                       >
                         {tag}
@@ -606,107 +604,80 @@ export default function TopicExplainer({ onDownload }: Props) {
                 )}
               </div>
 
-              {/* Diagrams/Photos Grid */}
+              {/* Vector SVG Panel */}
               {pexelsLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                  {Array.from({ length: 3 }).map((_, idx) => (
-                    <div key={idx} className="bg-slate-50 border border-slate-100 rounded-xl p-3 space-y-3 animate-pulse">
-                      <div className="bg-slate-200 rounded-lg aspect-video h-40 w-full" />
-                      <div className="space-y-1.5">
-                        <div className="h-3 w-3/4 bg-slate-200 rounded-sm" />
-                        <div className="h-2.5 w-1/2 bg-slate-200 rounded-sm" />
-                      </div>
-                    </div>
-                  ))}
+                <div className="bg-slate-50 border border-[#E2E8F0] rounded-xl p-8 text-center space-y-3 flex flex-col justify-center items-center animate-pulse">
+                  <span className="w-10 h-10 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin" />
+                  <p className="text-xs font-black text-slate-700">Writing vector diagram code with Gemini...</p>
+                  <p className="text-[10px] font-bold text-slate-500">Creating custom annotations and clean educational schemas.</p>
                 </div>
               ) : pexelsError ? (
                 <div className="bg-amber-50 border border-amber-100 p-6 rounded-xl text-center space-y-2">
                   <AlertTriangle className="text-amber-500 mx-auto" size={24} />
-                  <p className="text-xs font-bold text-amber-900">Unable to Fetch Diagrams</p>
+                  <p className="text-xs font-bold text-amber-900">Unable to Render SVG Diagram</p>
                   <p className="text-[11px] text-amber-700 leading-relaxed max-w-lg mx-auto">
                     {pexelsError}
                   </p>
-                  <p className="text-[10px] text-slate-500 max-w-sm mx-auto">
-                    Make sure you have declared <code className="font-mono bg-white px-1.5 py-0.5 rounded border border-[#E2E8F0]">PEXELS_API_KEY</code> properly in your environment secrets or backend config.
-                  </p>
                 </div>
-              ) : pexelsPhotos.length === 0 ? (
-                <div className="bg-slate-50/50 border border-[#E2E8F0] p-8 rounded-xl text-center space-y-2">
-                  <ImageIcon className="text-slate-300 mx-auto" size={28} />
-                  <p className="text-xs font-bold text-slate-700 text-center">No Diagrams Found</p>
-                  <p className="text-[11px] text-slate-500 max-w-md mx-auto leading-relaxed">
-                    Pexels returned no exact matches for <span className="font-semibold text-slate-800">"{pexelsQuery || 'your query'}"</span>. Try typing broader educational keywords (e.g. "Biology" or "Chemistry Molecule" or "Planet Space") above.
+              ) : !generatedDiagramSvg ? (
+                <div className="bg-[#FAFDFB] border border-dashed border-emerald-250 p-8 rounded-xl text-center space-y-2">
+                  <ImageIcon className="text-emerald-250 mx-auto" size={32} />
+                  <p className="text-xs font-bold text-emerald-800 text-center">No Diagram Rendered Yet</p>
+                  <p className="text-[11px] text-emerald-600/70 max-w-md mx-auto leading-relaxed">
+                    Click one of the suggested scientific terms above or enter a detailed custom layout term and hit "Render Diagram" to trigger Gemini. This drawing will be automatically embedded as a presentation slide in your exported PDF!
                   </p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 p-3 rounded-lg flex items-center gap-1.5 animate-in fade-in">
-                    <Sparkles size={14} className="shrink-0 animate-pulse text-emerald-500" />
-                    <span>The top {Math.min(2, pexelsPhotos.length)} visual aid(s) shown below are automatically queued to be formatted and embedded into your PDF lesson!</span>
+                  <div className="text-xs font-bold text-emerald-700 bg-[#E6F7F0] border border-emerald-100 p-3.5 rounded-lg flex items-center gap-1.5 animate-in fade-in">
+                    <Sparkles size={14} className="shrink-0 text-emerald-500" />
+                    <span>The academic blueprint is loaded and will be exported as Landscape Slide 5 inside your PDF!</span>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {pexelsPhotos.map((photo, iIdx) => (
-                      <div 
-                        key={photo.id} 
-                        className={cn(
-                          "group bg-white border rounded-xl p-3 shadow-3xs hover:shadow-xs transition-all flex flex-col justify-between overflow-hidden relative",
-                          iIdx < 2 ? "border-emerald-200 ring-4 ring-emerald-500/5 bg-emerald-50/10 shadow-emerald-50" : "border-[#E2E8F0]"
-                        )}
-                      >
-                        {iIdx < 2 && (
-                          <div className="absolute top-4 left-4 z-10 bg-emerald-600 text-white text-[9px] font-black tracking-wider uppercase px-2 py-0.5 rounded shadow-sm">
-                            Queued for PDF
-                          </div>
-                        )}
-                        <div className="rounded-lg overflow-hidden relative aspect-video bg-slate-100 flex items-center justify-center">
-                          <img 
-                            src={photo.src.medium} 
-                            alt={photo.alt || "Diagram image"} 
-                            referrerPolicy="no-referrer"
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                          <a 
-                            href={photo.url} 
-                            target="_blank" 
-                            rel="noreferrer" 
-                            className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/50 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70 flex items-center justify-center pointer-events-auto"
-                            title="Open full page on Pexels"
-                          >
-                            <ExternalLink size={12} />
-                          </a>
-                        </div>
-
-                        <div className="mt-3 space-y-1">
-                          <p className="text-[11px] font-bold text-slate-800 line-clamp-1">
-                            {photo.alt || "Educational Visual Aid"}
-                          </p>
-                          <div className="flex items-center justify-between">
-                            <p className="text-[10px] text-slate-400 font-medium">
-                              By: <a 
-                                href={photo.photographer_url} 
-                                target="_blank" 
-                                rel="noreferrer" 
-                                className="hover:underline font-semibold text-slate-500"
-                              >
-                                {photo.photographer}
-                              </a>
-                            </p>
-                            <a
-                              href={photo.src.large2x || photo.src.original}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-[10px] font-black text-violet-600 hover:underline flex items-center gap-0.5 font-sans"
-                            >
-                              View High-Res
-                            </a>
-                          </div>
-                        </div>
+                  
+                  <div className="bg-white border-2 border-emerald-100 rounded-xl p-6 shadow-sm flex flex-col items-center">
+                    {/* Inline preview of generated XML/SVG code */}
+                    <div 
+                      className="w-full flex items-center justify-center p-2 rounded-lg bg-emerald-50/10 border border-emerald-100 max-h-[380px] overflow-hidden shadow-inner flex shrink-0"
+                      dangerouslySetInnerHTML={{ __html: generatedDiagramSvg }}
+                    />
+                    
+                    <div className="mt-4 flex flex-wrap items-center justify-between w-full border-t border-gray-100 pt-4 gap-3">
+                      <div>
+                        <p className="text-xs font-extrabold text-emerald-950">Whiteboard Diagram: {pexelsQuery || topic}</p>
+                        <p className="text-[10px] text-emerald-400 font-bold font-sans">Scaled vectors produced by Gemini</p>
                       </div>
-                    ))}
+
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const blob = new Blob([generatedDiagramSvg], { type: 'image/svg+xml' });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `edugen_${(pexelsQuery || 'concept').toLowerCase().replace(/\s+/g, '_')}.svg`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                          }}
+                          className="px-3.5 py-1.5 rounded-lg text-xs font-black bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 cursor-pointer"
+                        >
+                          Save SVG File
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            navigator.clipboard.writeText(generatedDiagramSvg);
+                            alert("Copied SVG XML code to clipboard successfully!");
+                          }}
+                          className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#FAFCFB] border border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer"
+                        >
+                          Copy SVG Markup
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-[9px] text-[#64748B] font-mono select-none text-center pt-2">
-                    Visual illustrations are fetched live under CC-compliant educational guidelines using Pexels Creative Commons API.
-                  </p>
                 </div>
               )}
             </div>
