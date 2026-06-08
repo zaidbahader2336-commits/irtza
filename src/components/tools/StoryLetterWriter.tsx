@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Sparkles, 
@@ -13,7 +13,7 @@ import {
 import { cn } from '../../lib/utils';
 import { Story, Letter } from '../../types';
 import { generatePDF, PDFItem } from '../../lib/pdf';
-import { saveToUserHistory } from '../../lib/userData';
+import { saveToUserHistory, getOrCreateDefaultUser } from '../../lib/userData';
 
 interface Props {
   onDownload: (name: string) => void;
@@ -42,18 +42,22 @@ export default function StoryLetterWriter({ onDownload }: Props) {
   const [mode, setMode] = useState<'story' | 'letter'>('story');
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [gradeLevel, setGradeLevel] = useState('High School (Grade 9-10)');
+  const [gradeLevel, setGradeLevel] = useState('Undergraduate / College');
   const [language, setLanguage] = useState('English');
 
   // Story state
   const [theme, setTheme] = useState('');
-  const [tone, setTone] = useState('Adventurous');
+  const [tone, setTone] = useState('Academic / Formal');
   const [story, setStory] = useState<Story | null>(null);
 
   // Letter state
-  const [letterType, setLetterType] = useState('Job Application');
+  const [letterType, setLetterType] = useState('Academic Memorandum');
   const [details, setDetails] = useState('');
   const [letter, setLetter] = useState<Letter | null>(null);
+
+  useEffect(() => {
+    // Start fresh - require user input
+  }, []);
 
   const generateStory = async () => {
     if (!theme.trim()) return;

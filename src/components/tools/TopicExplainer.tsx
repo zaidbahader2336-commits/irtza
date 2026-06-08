@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
 import { 
@@ -18,7 +18,7 @@ import {
 import { cn } from '../../lib/utils';
 import { TopicExplanation } from '../../types';
 import { generatePDF, PDFItem } from '../../lib/pdf';
-import { saveToUserHistory } from '../../lib/userData';
+import { saveToUserHistory, getOrCreateDefaultUser } from '../../lib/userData';
 
 const convertUrlToBase64 = (url: string): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -73,8 +73,8 @@ const LANGUAGES = [
 
 export default function TopicExplainer({ onDownload }: Props) {
   const [topic, setTopic] = useState('');
-  const [level, setLevel] = useState('Intermediate');
-  const [gradeLevel, setGradeLevel] = useState('High School (Grade 9-10)');
+  const [level, setLevel] = useState('Advanced');
+  const [gradeLevel, setGradeLevel] = useState('Undergraduate / College');
   const [language, setLanguage] = useState('English');
   const [loading, setLoading] = useState(false);
   const [explanation, setExplanation] = useState<TopicExplanation | null>(null);
@@ -85,6 +85,10 @@ export default function TopicExplainer({ onDownload }: Props) {
   const [pexelsLoading, setPexelsLoading] = useState(false); // Map selector to same name
   const [pexelsError, setPexelsError] = useState<string | null>(null);
   const [downloadingPDF, setDownloadingPDF] = useState(false);
+
+  useEffect(() => {
+    // Start fresh - require user input
+  }, []);
 
   const cleanQueryText = (rawStr: string): string => {
     if (!rawStr) return '';

@@ -30,7 +30,7 @@ function askSolvedOrUnsolved(title: string): Promise<boolean | null> {
     backdrop.style.left = '0';
     backdrop.style.width = '100vw';
     backdrop.style.height = '100vh';
-    backdrop.style.backgroundColor = 'rgba(6, 78, 59, 0.4)';
+    backdrop.style.backgroundColor = 'rgba(74, 18, 26, 0.4)';
     backdrop.style.backdropFilter = 'blur(10px)';
     backdrop.style.zIndex = '999999';
     backdrop.style.display = 'flex';
@@ -45,7 +45,7 @@ function askSolvedOrUnsolved(title: string): Promise<boolean | null> {
     const card = document.createElement('div');
     card.style.background = '#ffffff';
     card.style.borderRadius = '24px';
-    card.style.boxShadow = '0 25px 50px -12px rgba(6, 78, 59, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.03)';
+    card.style.boxShadow = '0 25px 50px -12px rgba(74, 18, 26, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.03)';
     card.style.width = '100%';
     card.style.maxWidth = '500px';
     card.style.padding = '28px';
@@ -56,18 +56,18 @@ function askSolvedOrUnsolved(title: string): Promise<boolean | null> {
     card.style.textAlign = 'center';
 
     card.innerHTML = `
-      <div style="width: 56px; height: 56px; background: #E6F7F0; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; border: 1px solid #A7F3D0;">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <div style="width: 56px; height: 56px; background: #FCFAF7; border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto; border: 1px solid #DFBA6B;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4A121A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
           <polyline points="7 10 12 15 17 10"></polyline>
           <line x1="12" y1="15" x2="12" y2="3"></line>
         </svg>
       </div>
 
-      <h3 style="font-size: 19px; font-weight: 800; color: #064E3B; margin: 0 0 4px 0; letter-spacing: -0.02em;">
-        Deck Slides Export Format
+      <h3 style="font-size: 19px; font-weight: 800; color: #4A121A; margin: 0 0 4px 0; letter-spacing: -0.02em;">
+        Academic Sheet Export Format
       </h3>
-      <p style="font-size: 14px; font-weight: bold; color: #059669; margin: 0 0 12px 0;">
+      <p style="font-size: 14px; font-weight: bold; color: #DFBA6B; margin: 0 0 12px 0;">
         سلائیڈز پی ڈی ایف ڈاؤن لوڈ کرنے کا طریقہ منتخب کریں
       </p>
       <p style="font-size: 13px; color: #374151; margin: 0 0 20px 0; line-height: 1.5; font-weight: 500;">
@@ -76,16 +76,16 @@ function askSolvedOrUnsolved(title: string): Promise<boolean | null> {
 
       <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; text-align: left;">
         <!-- Option 1: Solved -->
-        <button id="modal-btn-solved" style="display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-radius: 14px; border: 2px solid #059669; background: linear-gradient(135deg, #E6F7F0 0%, #FFFFFF 100%); cursor: pointer; text-align: left; transition: all 0.2s ease; width: 100%; box-sizing: border-box; outline: none;">
-          <div style="width: 20px; height: 20px; border-radius: 50%; background: #059669; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+        <button id="modal-btn-solved" style="display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-radius: 14px; border: 2px solid #5C1D24; background: linear-gradient(135deg, #FCFAF7 0%, #FFFFFF 100%); cursor: pointer; text-align: left; transition: all 0.2s ease; width: 100%; box-sizing: border-box; outline: none;">
+          <div style="width: 20px; height: 20px; border-radius: 50%; background: #5C1D24; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
             <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
           </div>
           <div style="flex-grow: 1;">
-            <div style="font-size: 14px; font-weight: 800; color: #064E3B; display: flex; align-items: center; gap: 6px;">
+            <div style="font-size: 14px; font-weight: 800; color: #4A121A; display: flex; align-items: center; gap: 6px;">
               <span>Solved Version (حل شدہ سلائیڈز)</span>
-              <span style="font-size: 10px; padding: 1px 6px; background: #D1FAE5; color: #047857; border-radius: 10px; font-weight: bold;">Default</span>
+              <span style="font-size: 10px; padding: 1px 6px; background: #F3E9D9; color: #5C1D24; border-radius: 10px; font-weight: bold;">Default</span>
             </div>
             <div style="font-size: 12px; color: #374151; margin-top: 3px; line-height: 1.4; font-weight: 500;">
               Full deck including explanations, solved answer keys, and diagrams embedded in the slides.
@@ -97,7 +97,7 @@ function askSolvedOrUnsolved(title: string): Promise<boolean | null> {
         <button id="modal-btn-unsolved" style="display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; border-radius: 14px; border: 2px solid #E2E8F0; background: #FFFFFF; cursor: pointer; text-align: left; transition: all 0.2s ease; width: 100%; box-sizing: border-box; outline: none;">
           <div style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #94A3B8; background: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; box-sizing: border-box;"></div>
           <div style="flex-grow: 1;">
-            <div style="font-size: 14px; font-weight: 800; color: #064E3B;">
+            <div style="font-size: 14px; font-weight: 800; color: #4A121A;">
               Unsolved Version (غیر حل شدہ شیٹ)
             </div>
             <div style="font-size: 12px; color: #475569; margin-top: 3px; line-height: 1.4; font-weight: 500;">
@@ -111,8 +111,8 @@ function askSolvedOrUnsolved(title: string): Promise<boolean | null> {
         <button id="modal-btn-cancel" style="height: 40px; padding: 0 16px; border-radius: 10px; border: 1px solid #CBD5E1; background: #FFFFFF; font-size: 13px; font-weight: bold; color: #64748B; cursor: pointer; transition: all 0.15s; outline: none;">
           Cancel
         </button>
-        <button id="modal-btn-confirm" style="height: 40px; padding: 0 24px; border-radius: 10px; border: none; background: #059669; font-size: 13px; font-weight: bold; color: #FFFFFF; cursor: pointer; transition: all 0.15s; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.2); outline: none;">
-          Export Deck
+        <button id="modal-btn-confirm" style="height: 40px; padding: 0 24px; border-radius: 10px; border: none; background: #4A121A; font-size: 13px; font-weight: bold; color: #FFFFFF; cursor: pointer; transition: all 0.15s; box-shadow: 0 4px 10px rgba(74, 18, 26, 0.2); outline: none;">
+          Export Sheet
         </button>
       </div>
     `;
@@ -135,11 +135,11 @@ function askSolvedOrUnsolved(title: string): Promise<boolean | null> {
 
     const updateUI = () => {
       if (isSolvedSelection) {
-        solvedBtn.style.borderColor = '#059669';
-        solvedBtn.style.background = 'linear-gradient(135deg, #E6F7F0 0%, #FFFFFF 100%)';
+        solvedBtn.style.borderColor = '#5C1D24';
+        solvedBtn.style.background = 'linear-gradient(135deg, #FCFAF7 0%, #FFFFFF 100%)';
         const circle = solvedBtn.querySelector('div') as HTMLDivElement;
-        circle.style.background = '#059669';
-        circle.style.borderColor = '#059669';
+        circle.style.background = '#5C1D24';
+        circle.style.borderColor = '#5C1D24';
         circle.innerHTML = `
           <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"></polyline>
@@ -153,11 +153,11 @@ function askSolvedOrUnsolved(title: string): Promise<boolean | null> {
         uncircle.style.background = '#FFFFFF';
         uncircle.innerHTML = '';
       } else {
-        unsolvedBtn.style.borderColor = '#059669';
-        unsolvedBtn.style.background = 'linear-gradient(135deg, #E6F7F0 0%, #FFFFFF 100%)';
+        unsolvedBtn.style.borderColor = '#5C1D24';
+        unsolvedBtn.style.background = 'linear-gradient(135deg, #FCFAF7 0%, #FFFFFF 100%)';
         const uncircle = unsolvedBtn.querySelector('div') as HTMLDivElement;
-        uncircle.style.borderColor = '#059669';
-        uncircle.style.background = '#059669';
+        uncircle.style.borderColor = '#5C1D24';
+        uncircle.style.background = '#5C1D24';
         uncircle.innerHTML = `
           <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"></polyline>
@@ -309,10 +309,8 @@ function parsePDFContent(content: PDFItem[]) {
         } else if (text.toLowerCase().startsWith('explanation:') || text.includes('وضاحت:')) {
           currentMCQ.explanation = text.replace(/^(explanation:|وضاحت:)\s*/i, '').trim();
         } else if (/^[a-dA-D]\s*$/.test(text)) {
-          // Fallback single letter matches
           currentMCQ.correctAnswer = text;
         } else {
-          // Maybe part of question
           currentMCQ.question += ' ' + text;
         }
       } else if (currentMode === 'short' && currentShort) {
@@ -391,7 +389,7 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
   overlay.style.left = '0';
   overlay.style.width = '100vw';
   overlay.style.height = '100vh';
-  overlay.style.backgroundColor = 'rgba(6, 78, 59, 0.5)';
+  overlay.style.backgroundColor = 'rgba(74, 18, 26, 0.55)';
   overlay.style.backdropFilter = 'blur(10px)';
   overlay.style.zIndex = '9999999';
   overlay.style.display = 'flex';
@@ -400,15 +398,15 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
   overlay.style.color = '#ffffff';
   overlay.style.fontFamily = "system-ui, -apple-system, 'Inter', sans-serif";
 
-  const loadingTitle = isUrdu ? "پیش رفت جاری ہے..." : "Generating Document...";
-  const loadingSub = isUrdu ? "آپ کا پورٹریٹ پی ڈی ایف رپورٹ تیار کیا جا رہا ہے۔ براے مہربانی انتظار کریں۔" : "Converting document pages to PDF. Please do not close this window.";
+  const loadingTitle = isUrdu ? "پیش رفت جاری ہے..." : "Generating Academic PDF...";
+  const loadingSub = isUrdu ? "آپ کا پورٹریٹ پی ڈی ایف رپورٹ تیار کیا جا رہا ہے۔ براے مہربانی انتظار کریں۔" : "Compiling dynamic scholastic pages in ultra-high resolution. Please wait.";
 
   overlay.innerHTML = `
-    <div style="background: white; color: #1E293B; padding: 2.5rem; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 100%; border: 1px solid #e1f5fe; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+    <div style="background: white; color: #1E293B; padding: 2.5rem; border-radius: 20px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.15); text-align: center; max-width: 400px; width: 100%; border: 1px solid #F3E9D9; display: flex; flex-direction: column; align-items: center; gap: 1rem;">
       <div style="position: relative; width: 80px; height: 80px;">
-        <div style="box-sizing: border-box; display: block; position: absolute; width: 64px; height: 64px; margin: 8px; border: 6px solid #059669; border-radius: 50%; animation: slide-ring-spin 1.2s linear infinite; border-color: #059669 transparent #10B981 transparent;"></div>
+        <div style="box-sizing: border-box; display: block; position: absolute; width: 64px; height: 64px; margin: 8px; border: 6px solid #4A121A; border-radius: 50%; animation: slide-ring-spin 1.2s linear infinite; border-color: #4A121A transparent #DFBA6B transparent;"></div>
       </div>
-      <h3 style="font-size: 1.25rem; font-weight: 800; color: #064E3B; margin: 0.5rem 0 0.25rem 0;">${loadingTitle}</h3>
+      <h3 style="font-size: 1.25rem; font-weight: 800; color: #4A121A; margin: 0.5rem 0 0.25rem 0;">${loadingTitle}</h3>
       <p style="font-size: 0.9rem; color: #475569; margin: 0; line-height: 1.5; font-weight: 500;">${loadingSub}</p>
     </div>
     <style>
@@ -434,10 +432,9 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
   if (parsed.mcqs.length > 0) calculatedMarks += parsed.mcqs.length * 1;
   if (parsed.shorts.length > 0) calculatedMarks += parsed.shorts.length * 3;
   if (parsed.longs.length > 0) calculatedMarks += parsed.longs.length * 10;
-  if (calculatedMarks === 0) calculatedMarks = 15; // default
+  if (calculatedMarks === 0) calculatedMarks = 100; // default for complete evaluation sheets
   const totalMarks = mergedOptions.totalMarks || `${calculatedMarks} Marks`;
 
-  // Filter out custom SVGs or images if passed in images list
   const selectedImages = content.filter(item => item.type === 'image' && item.text);
 
   // Create temporary off-screen container for rendering
@@ -446,8 +443,8 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
   container.style.position = 'fixed';
   container.style.top = '-9999px';
   container.style.left = '-9999px';
-  container.style.width = '800px'; // Math perfect portrait bounds matching A4 ratio
-  container.style.backgroundColor = '#FAFDFB';
+  container.style.width = '800px'; 
+  container.style.backgroundColor = '#FCFAF7';
   container.style.boxSizing = 'border-box';
 
   document.body.appendChild(container);
@@ -455,10 +452,9 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
   // Embed fonts
   const fontTag = document.createElement('link');
   fontTag.rel = 'stylesheet';
-  fontTag.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Naskh+Arabic:wght@400;700&display=swap';
+  fontTag.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Noto+Naskh+Arabic:wght@400;700&display=swap';
   document.head.appendChild(fontTag);
 
-  // Wait for font load
   await document.fonts.ready;
   await new Promise(r => setTimeout(r, 600));
 
@@ -470,283 +466,581 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
 
   const pages: DocumentPageLayout[] = [];
 
-  // --- PAGE 1: COVER PAGE ---
+  // --- PAGE 1: COVER PAGE (Crimson and Gold Scholar Theme) ---
+  const dateStr = new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+  const subjectStr = mergedOptions.subject || (isUrdu ? 'نصابی مواد' : 'Advanced Curricula');
+
   const coverHTML = `
-    <div style="position: absolute; top: 0; left: 0; width: 500px; height: 350px; background: #1B4332; clip-path: polygon(0 0, 100% 0, 0 100%);"></div>
-    <div style="position: absolute; top: 40px; right: 0; width: 190px; height: 32px; background: #19CE86; z-index: 1;"></div>
-    <div style="position: absolute; top: 105px; right: 0; width: 50px; height: 160px; background: #19CE86; z-index: 1;"></div>
-    
-    <div style="position: absolute; top: 75px; right: 60px; text-align: right; font-family: 'Inter', sans-serif; z-index: 5;">
-      <div style="display: inline-flex; flex-direction: column; align-items: flex-end;">
-        <span style="font-size: 28px; color: #1B4332; font-weight: 900; line-height: 1;">❖</span>
-        <span style="font-size: 16px; font-weight: 850; color: #1B4332; tracking: -0.5px; margin-top: 4px;">EduGen AI</span>
+    <div style="width: 100%; height: 100%; padding: 55px 50px; background: #0F172A; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between; color: #ffffff; border: 15px solid #0F172A; outline: 1px solid #DFBA6B; outline-offset: -10px;">
+      <!-- Crest and Logo -->
+      <div style="text-align: center; margin-top: 15px;">
+        <svg width="110" height="110" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto;">
+          <!-- Laurels right -->
+          <path d="M 50 82 C 68 80, 83 61, 75 35 M 50 72 C 60 70, 71 58, 67 40" stroke="#DFBA6B" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.95"/>
+          <path d="M 72 38 L 75 35 L 70 34" stroke="#DFBA6B" stroke-width="1.5" fill="none"/>
+          <!-- Laurels left -->
+          <path d="M 50 82 C 32 80, 17 61, 25 35 M 50 72 C 40 70, 29 58, 33 40" stroke="#DFBA6B" stroke-width="1.8" stroke-linecap="round" fill="none" opacity="0.95"/>
+          <path d="M 28 38 L 25 35 L 30 34" stroke="#DFBA6B" stroke-width="1.5" fill="none"/>
+          <!-- Shield outline -->
+          <path d="M 37 28 L 50 21 L 63 28 L 63 53 C 63 67, 50 73, 50 73 C 50 73, 37 67, 37 53 Z" fill="#0F172A" stroke="#DFBA6B" stroke-width="2.5" stroke-linejoin="round"/>
+          <circle cx="50" cy="81" r="2.2" fill="#DFBA6B"/>
+          <circle cx="34" cy="74" r="1.5" fill="#DFBA6B"/>
+          <circle cx="66" cy="74" r="1.5" fill="#DFBA6B"/>
+          <circle cx="23" cy="61" r="1.5" fill="#DFBA6B"/>
+          <circle cx="77" cy="61" r="1.5" fill="#DFBA6B"/>
+          
+          <!-- Graduation hat and book elements inside shield -->
+          <path d="M 43 40 Q 50 37, 50 42 Q 50 37, 57 40 L 57 48 Q 50 45, 50 50 Q 50 45, 43 48 Z" fill="#DFBA6B" stroke="#DFBA6B" stroke-width="0.5"/>
+          <path d="M 50 53 L 56 55 L 50 57 L 44 55 Z" fill="#DFBA6B"/>
+          <path d="M 47 56 L 47 60 Q 50 62, 53 60 L 53 56" stroke="#DFBA6B" stroke-width="1.2" fill="none"/>
+          <path d="M 50 56 L 43 59 L 43 62" stroke="#DFBA6B" stroke-width="0.8" fill="none"/>
+        </svg>
+        <h1 style="font-family: 'Playfair Display', 'Georgia', serif; font-size: 38px; font-weight: 900; letter-spacing: 5px; color: #DFBA6B; text-transform: uppercase; margin: 12px 0 0 0; line-height: 1;">EDUGEN</h1>
+        <p style="font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 800; letter-spacing: 5px; color: #DFBA6B; opacity: 0.85; text-transform: uppercase; margin: 6px 0 0 0;">EDUCATION GENERATION</p>
       </div>
-    </div>
 
-    <div style="position: absolute; top: 310px; left: 60px; right: 60px; font-family: 'Inter', sans-serif; text-align: left; z-index: 4;">
-      <h1 style="font-size: 44px; font-weight: 900; color: #1B4332; line-height: 1.15; margin: 0 0 15px 0; tracking: -1px; width: 90%;">
-        Accelerating Intelligence & Learning
-      </h1>
-      <p style="font-size: 16px; font-weight: 700; color: #1B4332; margin: 0 0 45px 0; opacity: 0.85;">
-        ${topic} Assignment & Lesson
-      </p>
+      <!-- Description Block -->
+      <div style="padding: 0 15px; margin-top: 15px; font-family: 'Inter', sans-serif; text-align: justify;">
+        <p style="font-size: 13.5px; font-weight: 700; color: #DFBA6B; margin-bottom: 12px; font-family: 'Georgia', serif; font-style: italic; text-align: center;">Edugen Platform: Advanced AI-Powered Academic Companion</p>
+        <p style="font-size: 11px; font-weight: 500; color: #F5EAE0; line-height: 1.6; margin-bottom: 11px; opacity: 0.95;">
+          Edugen is an innovative AI-powered academic companion designed to support students, educators, and researchers throughout their academic journey. Our platform integrates advanced artificial intelligence with a user-friendly interface to deliver accurate, reliable, and personalized academic assistance.
+        </p>
+        <p style="font-size: 11px; font-weight: 500; color: #F5EAE0; line-height: 1.6; opacity: 0.95; margin-bottom: 15px;">
+          Edugen brings together a comprehensive suite of tools tailored to meet diverse academic needs — from generating high-quality questions and explanations to providing in-depth analyses and study materials. Whether you are preparing for exams, conducting research, or enhancing your understanding of complex topics, Edugen is your intelligent partner in learning and discovery.
+        </p>
 
-      <div style="font-family: 'Inter', sans-serif; margin-bottom: 45px;">
-        <div style="font-size: 14px; font-weight: 800; color: #1E3A8A; margin-bottom: 2px;">EduGen App Administration</div>
-        <div style="font-size: 12px; font-weight: 600; color: #475569; line-height: 1.5;">
-          Global Virtual Campus<br>
-          info@edugenn.lovable.app<br>
-          edugenn.lovable.app<br>
-          +92 300 0000000
+        <!-- Tool grid divider -->
+        <div style="border-top: 1px dashed rgba(223, 186, 107, 0.3); margin-bottom: 12px;"></div>
+        <p style="text-align: center; font-size: 10px; font-weight: 800; color: #DFBA6B; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px;">Edugen Includes the Following Core Tools:</p>
+
+        <!-- Dynamic Grid Layout matching Screenshot 1 (8 modules) -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 6px; text-align: center; margin-bottom: 10px;">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DFBA6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+              <path d="M9 12l2 2 4-4"/>
+            </svg>
+            <span style="font-size: 8.5px; font-weight: 800; color: #F5EAE0; line-height: 1.2;">MCQ<br>Generator</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DFBA6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+              <path d="M12 8v3M12 14h.01"/>
+            </svg>
+            <span style="font-size: 8.5px; font-weight: 800; color: #F5EAE0; line-height: 1.2;">Short<br>Questions</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DFBA6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            <span style="font-size: 8.5px; font-weight: 800; color: #F5EAE0; line-height: 1.2;">Long<br>Questions</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DFBA6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <span style="font-size: 8.5px; font-weight: 800; color: #F5EAE0; line-height: 1.2;">Topic<br>Explainer</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DFBA6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            <span style="font-size: 8.5px; font-weight: 800; color: #F5EAE0; line-height: 1.2;">Story &<br>Letter</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DFBA6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <text x="6" y="18" fill="#DFBA6B" font-family="'Inter', sans-serif" font-size="9" font-weight="900">A+</text>
+            </svg>
+            <span style="font-size: 8.5px; font-weight: 800; color: #F5EAE0; line-height: 1.2;">Exam<br>Mode</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DFBA6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            <span style="font-size: 8.5px; font-weight: 800; color: #F5EAE0; line-height: 1.2;">My<br>Downloads</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 4px;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DFBA6B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+            <span style="font-size: 8.5px; font-weight: 800; color: #F5EAE0; line-height: 1.2;">Visual<br>Analysis</span>
+          </div>
         </div>
       </div>
 
-      <!-- KEY LEARNING MODULES block from Screenshot 1 -->
-      <div style="background: #EAFBF4; border-left: 4px solid #19CE86; padding: 20px 24px; border-radius: 4px 16px 16px 4px; max-width: 320px; box-shadow: 0 10px 25px -10px rgba(27, 67, 50, 0.08); margin-bottom: 60px;">
-        <div style="font-size: 12px; font-weight: 850; color: #064E3B; margin-bottom: 10px; tracking: 0.5px; text-transform: uppercase;">Key Learning Modules:</div>
-        <ul style="margin: 0; padding-left: 14px; font-size: 12px; font-weight: 700; color: #1B4332; line-height: 1.6; list-style-type: disc;">
-          <li>Ethics in Design & AI</li>
-          <li>Machine Learning Architectures</li>
-          <li>Real-world Application Scaling</li>
-        </ul>
+      <!-- Bottom Title Block -->
+      <div style="text-align: center; margin-bottom: 10px; font-family: 'Playfair Display', 'Georgia', serif;">
+        <div style="width: 100%; border-top: 1.5px solid rgba(223, 186, 107, 0.4); margin-bottom: 12px;"></div>
+        <h2 style="font-size: 22px; font-weight: 900; color: #DFBA6B; margin: 0 0 6px 0; letter-spacing: -0.2px;">Professional Scholastic Resource Portfolio</h2>
+        <h3 style="font-size: 18px; font-weight: 800; color: #DFBA6B; margin: 0 0 4px 0;">Cover Page</h3>
+        <p style="font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 700; color: #F5EAE0; margin: 0 0 8px 0;">By: ${student}</p>
+        <div style="width: 70px; height: 1.2px; background: rgba(223, 186, 107, 0.4); margin: 0 auto 8px auto;"></div>
+        <p style="font-family: 'Inter', sans-serif; font-size: 9.5px; font-weight: 500; color: #D4C5B9; line-height: 1.5; max-width: 580px; margin: 0 auto; text-align: center;">
+          This scholastic portfolio has been prepared for academic purposes as part of the ${subjectStr} curriculum evaluation for ${classLevel}. It aims to explore key concepts related to "${topic}" and ensure high-fidelity comprehension through practice matrices, guided response sheets, and unified cognitive reinforcement assessments.
+        </p>
+        <p style="font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 700; color: #DFBA6B; letter-spacing: 0.8px; margin-top: 12px;">
+          ${dateStr}
+        </p>
       </div>
     </div>
-
-    <!-- Bottom Left Disclaimer -->
-    <div style="position: absolute; bottom: 50px; left: 60px; right: 180px; font-size: 10px; font-weight: 500; color: rgba(27, 67, 50, 0.5); line-height: 1.5; font-family: 'Inter', sans-serif; text-align: left;">
-      This document contains confidential educational and proprietary information intended exclusively for the EduGen student community.
-    </div>
-
-    <div style="position: absolute; bottom: 0; right: 0; width: 400px; height: 230px; background: #1B4332; clip-path: polygon(100% 0, 100% 100%, 0 100%);"></div>
   `;
   pages.push({ title: 'Cover Page', elementsHTML: coverHTML, showFooterPageNum: false });
 
-  // --- PAGE 2: ASSESSMENT SHEET / WORKSHEET (Matches Screenshot 2) ---
-  const headerHTML = `
-    <!-- Forest Green header bar with logo -->
-    <div style="background: #1B4332; border-radius: 12px; padding: 22px 26px; color: white; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-family: 'Inter', sans-serif;">
-      <div style="display: flex; flex-direction: column;">
-        <div style="font-size: 26px; font-weight: 900; letter-spacing: -0.5px; display: flex; align-items: center; gap: 6px; line-height: 1;">
-          <span>EduGen</span>
-        </div>
-        <div style="font-size: 10px; font-weight: 800; margin-top: 4px; tracking: 1.2px; opacity: 0.8; text-transform: uppercase;">
-          AI Assessment Sheet
-        </div>
-      </div>
-      <div style="text-align: right; font-size: 11px; font-weight: 600; opacity: 0.95; line-height: 1.5;">
-        Subject: <strong>${topic}</strong><br>
-        App: <strong>edugenn.lovable.app</strong>
-      </div>
+  // Elegant header standard reusable string
+  const elegantHeaderHTML = `
+    <div style="border-bottom: 3.5px solid #0F172A; padding-bottom: 4px; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: flex-end; font-family: 'Playfair Display', 'Georgia', serif;">
+      <span style="font-size: 26px; font-weight: 900; color: #0F172A; letter-spacing: 2px; line-height: 1;">EDUGEN</span>
+      <span style="font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 800; color: #0F172A; letter-spacing: 1.2px; text-transform: uppercase;">UNIFIED LEARNING MATRIX • SYSTEMS SPECIFICATION</span>
     </div>
-
-    <!-- Metadata Grid (Table style) -->
-    <div style="display: grid; grid-template-columns: repeat(3, 1fr); border: 1.5px solid #E2E8F0; border-radius: 10px; overflow: hidden; margin-bottom: 24px; font-family: 'Inter', sans-serif; background: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.01);">
-      <div style="border-right: 1.5px solid #E2E8F0; border-bottom: 1.5px solid #E2E8F0; padding: 12px 14px;">
-        <div style="font-size: 9px; font-weight: 850; color: #64748B; text-transform: uppercase; margin-bottom: 3px; tracking: 0.5px;">Student Target</div>
-        <div style="font-size: 12px; font-weight: 800; color: #1B4332;">${student}</div>
-      </div>
-      <div style="border-right: 1.5px solid #E2E8F0; border-bottom: 1.5px solid #E2E8F0; padding: 12px 14px;">
-        <div style="font-size: 9px; font-weight: 850; color: #64748B; text-transform: uppercase; margin-bottom: 3px; tracking: 0.5px;">Class Level</div>
-        <div style="font-size: 12px; font-weight: 800; color: #1B4332; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${classLevel}</div>
-      </div>
-      <div style="border-bottom: 1.5px solid #E2E8F0; padding: 12px 14px;">
-        <div style="font-size: 9px; font-weight: 850; color: #64748B; text-transform: uppercase; margin-bottom: 3px; tracking: 0.5px;">Language</div>
-        <div style="font-size: 12px; font-weight: 800; color: #1B4332;">${language}</div>
-      </div>
-      <div style="border-right: 1.5px solid #E2E8F0; padding: 12px 14px;">
-        <div style="font-size: 9px; font-weight: 850; color: #64748B; text-transform: uppercase; margin-bottom: 3px; tracking: 0.5px;">Total Marks</div>
-        <div style="font-size: 12px; font-weight: 800; color: #1B4332;">${totalMarks}</div>
-      </div>
-      <div style="border-right: 1.5px solid #E2E8F0; padding: 12px 14px;">
-        <div style="font-size: 9px; font-weight: 850; color: #64748B; text-transform: uppercase; margin-bottom: 3px; tracking: 0.5px;">Time Allowed</div>
-        <div style="font-size: 12px; font-weight: 800; color: #1B4332;">${timeAllowed}</div>
-      </div>
-      <div style="padding: 12px 14px;">
-        <div style="font-size: 9px; font-weight: 850; color: #64748B; text-transform: uppercase; margin-bottom: 3px; tracking: 0.5px;">Difficulty Range</div>
-        <div style="font-size: 12px; font-weight: 800; color: #1B4332;">Mixed (Core Foundation)</div>
-      </div>
-    </div>
-
-    <!-- Instructions banner -->
-    <div style="background: #EAFBF4; border-left: 4px solid #19CE86; border-radius: 6px; padding: 14px 18px; margin-bottom: 24px; font-family: 'Inter', sans-serif; font-size: 11.5px; color: #064E3B; line-height: 1.6; font-weight: 600; text-align: left;">
-      <span style="color: #19CE86; font-weight: 900; margin-right: 4px;">Instructions:</span> Read all questions carefully. Formulate structured arguments. Grading will be based on key concepts, technical relevance, and clarity.
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; border-bottom: 1.2px solid #DFBA6B; padding-bottom: 6px;">
+      <span style="font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 800; color: #DFBA6B; letter-spacing: 1.5px; text-transform: uppercase;">ADVANCED ACADEMIC INTELLIGENCE SUITE</span>
+      <span style="font-family: 'Inter', sans-serif; font-size: 8px; font-weight: 800; color: #1E3A8A; tracking: 0.5px; text-transform: uppercase;">TOPIC: ${topic.toUpperCase()}</span>
     </div>
   `;
 
-  // Determine what type of sheet to build
-  const hasExamItems = parsed.mcqs.length > 0 || parsed.shorts.length > 0 || parsed.longs.length > 0;
+  // --- DYNAMIC PORTRAIT COMPILING ENGINE ---
+  const dirStyle = isUrdu ? "direction: rtl; text-align: right;" : "text-align: justify;";
+  const alignStyle = isUrdu ? "text-align: right;" : "text-align: left;";
 
-  if (hasExamItems) {
-    // QUESTION WORKSHEET SHEET
-    let worksheetHTML = headerHTML;
-    worksheetHTML += `
-      <div style="font-family: 'Inter', sans-serif;">
-        <h2 style="font-size: 14px; font-weight: 900; color: #1B4332; border-bottom: 1.5px solid #1B4332; padding-bottom: 6px; margin: 0 0 16px 0; tracking: 0.5px; text-transform: uppercase;">
-          SECTION B: SHORT QUESTIONS
-        </h2>
-        <div style="display: flex; flex-direction: column; gap: 14px;">
-    `;
+  const blocks: { html: string; estimatedHeight: number }[] = [];
 
-    // Add short questions inside the assessment sheet
-    const displayShorts = parsed.shorts.length > 0 ? parsed.shorts : [
-      { question: "What is Artificial Intelligence (AI), and how does it differ from human intelligence?", modelAnswer: "" },
-      { question: "What are some common applications of AI in everyday life?", modelAnswer: "" },
-      { question: "How does machine learning, a subset of AI, enable computers to learn from data?", modelAnswer: "" },
-      { question: "What are some potential risks and challenges associated with the development and use of AI?", modelAnswer: "" },
-      { question: "What role do data and algorithms play in the development of AI systems?", modelAnswer: "" }
-    ];
+  // 1. TOPIC EXPLAINER NARRATIVE BLOCKS
+  if (parsed.lessons.length > 0) {
+    parsed.lessons.forEach((lesson) => {
+      const isStoryOrLetter = (
+        topic.toLowerCase().includes('story') || 
+        topic.toLowerCase().includes('letter') || 
+        title.toLowerCase().includes('story') || 
+        title.toLowerCase().includes('letter') ||
+        lesson.title.toLowerCase().includes('story') || 
+        lesson.title.toLowerCase().includes('letter') ||
+        lesson.title.toLowerCase().includes('memorandum') ||
+        lesson.title.toLowerCase().includes('application')
+      );
 
-    displayShorts.slice(0, 5).forEach((q, idx) => {
-      const qStr = String(idx + 1).padStart(2, '0');
-      const diffTag = idx % 3 === 0 ? 'Difficulty: High' : idx % 3 === 1 ? 'Difficulty: Medium' : 'Difficulty: Easy';
-      const diffBg = idx % 3 === 0 ? '#FEF2F2' : idx % 3 === 1 ? '#FFFBEB' : '#ECFDF5';
-      const diffColor = idx % 3 === 0 ? '#991B1B' : idx % 3 === 1 ? '#92400E' : '#065F46';
+      const badgeText = isStoryOrLetter ? "07 • STORY & LETTER ENGINE" : "01 • TOPIC EXPLAINER SUITE";
+      const titleLabel = isStoryOrLetter ? "Contextual Narratives & Documentation" : lesson.title;
 
-      worksheetHTML += `
-        <!-- Question Unit Card -->
-        <div style="background: white; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 14px 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.01); border-left: 3.5px solid #1B4332;">
-          <div style="font-size: 12.5px; font-weight: 700; color: #1B4332; line-height: 1.5; margin-bottom: 10px; text-align: left;">
-            <strong style="color: #1B4332; margin-right: 6px;">Q ${qStr}</strong> ${q.question}
+      blocks.push({
+        html: `
+          <div style="background: #1E3A8A; color: #D4B581; padding: 4px 14px; border-radius: 6px; display: inline-flex; align-items: center; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 12px; margin-top: 8px;">
+            ${badgeText}
           </div>
-          <div style="display: flex; gap: 8px; align-items: center; justify-content: flex-start; margin-bottom: ${!isSolved ? '35px' : '0px'};">
-            <span style="background: ${diffBg}; color: ${diffColor}; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 6px;">${diffTag}</span>
-            <span style="background: #EEF2FF; color: #3730A3; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 6px;">Topic: ${topic}</span>
-            <span style="margin-left: auto; color: #1B4332; font-weight: 800; font-size: 11px;">3 Marks</span>
-          </div>
-          ${!isSolved ? `
-            <!-- Space for student write in -->
-            <div style="border-bottom: 1.2px dotted #CBD5E1; height: 16px; margin-bottom: 10px;"></div>
-            <div style="border-bottom: 1.2px dotted #CBD5E1; height: 16px; margin-bottom: 10px;"></div>
-            <div style="border-bottom: 1.2px dotted #CBD5E1; height: 16px;"></div>
-          ` : ''}
-        </div>
-      `;
-    });
-
-    worksheetHTML += `
-        </div>
-      </div>
-    `;
-    pages.push({ title: 'Assessment Sheet', elementsHTML: worksheetHTML, showFooterPageNum: true });
-
-    // --- PAGE 3: ANSWER KEY & RUBRICS (Matches Screenshot 3) ---
-    if (isSolved) {
-      let answersHTML = `
-        <!-- Answer key header bar bar -->
-        <div style="background: #1B4332; border-radius: 12px; padding: 22px 26px; color: white; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-family: 'Inter', sans-serif;">
-          <div style="display: flex; flex-direction: column;">
-            <div style="font-size: 26px; font-weight: 900; letter-spacing: -0.5px; display: flex; align-items: center; gap: 6px; line-height: 1;">
-              <span>EduGen AI</span>
-            </div>
-            <div style="font-size: 10px; font-weight: 850; margin-top: 4px; tracking: 1.2px; opacity: 0.8; text-transform: uppercase;">
-              Answer Key & Rubrics
-            </div>
-          </div>
-          <div style="text-align: right; font-size: 11px; font-weight: 800; color: #19CE86; tracking: 0.5px; text-transform: uppercase;">
-            Confidential Teacher Guidelines
-          </div>
-        </div>
-
-        <div style="font-family: 'Inter', sans-serif;">
-          <h2 style="font-size: 13px; font-weight: 900; color: #1B4332; tracking: 1px; margin: 0 0 16px 0; text-transform: uppercase; border-bottom: 1.5px solid #E2E8F0; padding-bottom: 8px;">
-            Detailed Scoring Scheme
-          </h2>
-          <div style="display: flex; flex-direction: column; gap: 14px;">
-      `;
-
-      displayShorts.slice(0, 5).forEach((q, idx) => {
-        const qStr = String(idx + 1).padStart(2, '0');
-        const defaultAnswers = [
-          "Artificial Intelligence (AI) refers to the development of computer systems that can perform tasks that typically require human intelligence, such as learning, problem-solving, and decision-making. Unlike human intelligence, AI is based on algorithms and data, and it can process information much faster and more accurately than humans. However, AI lacks the creativity, emotions, and common sense that humans take for granted.",
-          "AI is used in various aspects of our daily lives, including virtual assistants like Siri and Alexa, image recognition software, and self-driving cars. Additionally, AI-powered chatbots are used in customer service, and AI algorithms are used to recommend products on e-commerce websites. These applications have made our lives more convenient and efficient.",
-          "Machine learning is a type of AI that allows computers to learn from data without being explicitly programmed. It involves training algorithms on large datasets, which enables the computer to identify patterns and make predictions or decisions. Through machine learning, computers can improve their performance on a task over time, much like humans learn from experience.",
-          "The development and use of AI pose several risks and challenges, including job displacement, bias in decision-making, and potential cybersecurity threats. Additionally, there are concerns about the impact of AI on society, such as the potential for AI to exacerbate existing social inequalities. As AI becomes more pervasive, it is essential to address these challenges and ensure that AI is developed and used responsibly.",
-          "Data and algorithms are the foundation of AI systems, as they enable computers to learn, reason, and interact with the world. High-quality data is necessary to train AI algorithms, which are sets of instructions that enable computers to perform specific tasks. The quality of the data and the algorithms used can significantly impact the performance and accuracy of an AI system."
-        ];
-        const mAnswer = q.modelAnswer || defaultAnswers[idx];
-
-        answersHTML += `
-          <!-- Answer Unit Card identical to Screenshot 3 -->
-          <div style="background: white; border: 1.5px solid #E2E8F0; border-radius: 12px; padding: 14px 18px; border-left: 3.5px solid #19CE86; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
-            <div style="font-size: 13px; font-weight: 850; color: #064E3B; margin-bottom: 6px;">
-              Q${idx + 1}: ${q.question.split('?')[0]}
-            </div>
-            <div style="background: #F4FBF9; border: 1.2px solid #E6F4ED; border-radius: 8px; padding: 12px 14px; font-size: 11.5px; color: #374151; line-height: 1.6; font-weight: 500; text-align: justify;">
-              <strong style="color: #064E3B; display: block; margin-bottom: 4px; text-transform: uppercase; font-size: 10px; tracking: 0.5px;">Model Answer:</strong>
-              ${mAnswer}
-            </div>
-          </div>
-        `;
+        `,
+        estimatedHeight: 40
       });
 
-      answersHTML += `
-          </div>
-        </div>
-      `;
-      pages.push({ title: 'Answer Key', elementsHTML: answersHTML, showFooterPageNum: true });
-    }
-  } else {
-    // COMPLETED LESSON / EXPLAINER GUIDE (Topic Explainer output)
-    let lessonPagesHTML = headerHTML;
-    
-    // Deconstruct explanation details to vertical A4 sections
-    const blocks = parsePDFContent(content);
-    
-    lessonPagesHTML += `
-      <div style="font-family: 'Inter', sans-serif;">
-        <h2 style="font-size: 15px; font-weight: 900; color: #1B4332; border-bottom: 2px solid #1B4332; padding-bottom: 6px; margin: 0 0 16px 0; uppercase; tracking: 0.5px;">
-          Active Lesson & Concepts Review
-        </h2>
-        
-        <div style="display: flex; flex-direction: column; gap: 20px;">
-          <!-- Description Block -->
-          <div style="background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 20px; border-left: 4.5px solid #1B4332;">
-            <div style="font-weight: 850; color: #1B4332; font-size: 11px; text-transform: uppercase; margin-bottom: 6px; tracking: 0.5px;">Executive Summary:</div>
-            <div style="font-size: 12px; color: #475569; line-height: 1.6; font-weight: 500; text-align: justify;">
-              ${content.find(c => c.type === 'text' && !c.text?.startsWith('•') && !c.text?.startsWith('[!'))?.text || 'Comprehensive learning review.'}
+      if (isStoryOrLetter) {
+        blocks.push({
+          html: `
+            <h3 style="font-family: 'Playfair Display', 'Georgia', serif; font-size: 19px; font-weight: 900; color: #1E3A8A; margin: 0 0 10px 0; ${alignStyle}">
+              ${titleLabel}
+            </h3>
+          `,
+          estimatedHeight: 35
+        });
+
+        const narrativeHTML = lesson.paragraphs.map(para => {
+          return `<p style="margin-bottom: 12px; font-family: 'Georgia', serif; font-size: 11.5px; line-height: 1.6; color: #2D2525; ${dirStyle}">${para}</p>`;
+        }).join('');
+
+        const totalChars = lesson.paragraphs.reduce((sum, p) => sum + p.length, 0);
+        const estimatedNarrativeH = Math.max(150, Math.ceil(totalChars / 80) * 16 + 80);
+
+        blocks.push({
+          html: `
+            <div style="border: 1.5px solid #D4B581; border-radius: 12px; padding: 22px; background: #ffffff; border-left: 4.5px solid #1E3A8A; text-align: justify; margin-bottom: 20px;">
+              <div style="font-family: 'Inter', sans-serif; font-size: 9px; font-weight: 850; color: #9A7B39; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px;">Custom Generated Asset Dossier</div>
+              <div style="font-weight: bold; margin-bottom: 6px; font-size: 12px; letter-spacing: -0.2px; font-family: 'Inter', sans-serif; color: #1E3A8A; text-transform: uppercase;">SUBJECT REFERENCE: ${lesson.title}</div>
+              <div style="font-weight: bold; margin-bottom: 15px; font-size: 10px; color: #64748B; font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.5px;">Status: Official Release</div>
+              ${narrativeHTML}
             </div>
-          </div>
-    `;
+          `,
+          estimatedHeight: estimatedNarrativeH
+        });
+      } else {
+        blocks.push({
+          html: `
+            <h3 style="font-family: 'Playfair Display', 'Georgia', serif; font-size: 19px; font-weight: 900; color: #1E3A8A; margin: 0 0 10px 0; ${alignStyle}">
+              ${lesson.title}
+            </h3>
+          `,
+          estimatedHeight: 35
+        });
 
-    // Foundation key bullets
-    const bullets = content.filter(c => c.type === 'text' && c.text?.startsWith('•')).map(c => c.text?.replace('•', '').trim());
-    if (bullets.length > 0) {
-      lessonPagesHTML += `
-        <!-- Foundations -->
-        <div style="background: white; border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px 20px; border-left: 4.5px solid #1B4332;">
-          <div style="font-weight: 850; color: #1B4332; font-size: 11px; text-transform: uppercase; margin-bottom: 10px; tracking: 0.5px;">Essential Foundations:</div>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            ${bullets.map(b => `
-              <div style="font-size: 11.5px; color: #374151; font-weight: 600; display: flex; align-items: flex-start; gap: 8px;">
-                <span style="color: #19CE86;">✔</span>
-                <span>${b}</span>
+        lesson.paragraphs.forEach((para) => {
+          const isHeading = para.startsWith('###');
+          if (isHeading) {
+            const cleanHeading = para.replace('###', '').trim();
+            blocks.push({
+              html: `
+                <h4 style="font-family: 'Playfair Display', 'Georgia', serif; font-size: 14px; font-weight: 800; color: #1E3A8A; margin: 16px 0 8px 0; ${alignStyle}">
+                  ${cleanHeading}
+                </h4>
+              `,
+              estimatedHeight: 30
+            });
+          } else {
+            const estimatedParaH = Math.max(50, Math.ceil(para.length / 75) * 16 + 20);
+            blocks.push({
+              html: `
+                <p style="font-family: 'Georgia', serif; font-size: 11.5px; color: #2E2222; line-height: 1.6; text-align: justify; margin-bottom: 12px; white-space: pre-wrap; ${dirStyle}">
+                  ${para}
+                </p>
+              `,
+              estimatedHeight: estimatedParaH
+            });
+          }
+        });
+
+        if (lesson.paragraphs.length > 1) {
+          const validParaForNotice = lesson.paragraphs.find(p => p.length > 50 && p.length < 200) || lesson.paragraphs[0].slice(0, 150) + "...";
+          blocks.push({
+            html: `
+              <div style="background: #FDFAF3; border: 1px solid rgba(212, 181, 129, 0.3); border-left: 4px solid #D4B581; border-radius: 6px; padding: 12px 16px; margin-bottom: 18px; font-family: 'Georgia', serif; font-size: 11px; color: #4A3E3E; line-height: 1.5; font-style: italic; ${dirStyle}">
+                <strong style="color: #1E3A8A; font-family: 'Inter', sans-serif; font-style: normal; font-weight: 850; margin-right: 4px; text-transform: uppercase; font-size: 9px; letter-spacing: 0.5px;">System Engine Notice:</strong> ${validParaForNotice}
               </div>
-            `).join('')}
+            `,
+            estimatedHeight: 110
+          });
+        }
+      }
+    });
+  }
+
+  // 2. MCQS MODULE BLOCKS
+  if (parsed.mcqs.length > 0) {
+    blocks.push({
+      html: `
+        <div style="background: #1E3A8A; color: #D4B581; padding: 4px 14px; border-radius: 6px; display: inline-flex; align-items: center; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 12px; margin-top: 8px;">
+          02 • MCQ GENERATOR MODULE
+        </div>
+      `,
+      estimatedHeight: 40
+    });
+
+    blocks.push({
+      html: `
+        <h3 style="font-family: 'Playfair Display', 'Georgia', serif; font-size: 19px; font-weight: 900; color: #1E3A8A; margin: 0 0 4px 0; ${alignStyle}">
+          High-Fidelity Evaluation Matrix
+        </h3>
+        <p style="font-family: 'Georgia', serif; font-size: 10.5px; color: #645A5A; font-style: italic; margin-bottom: 16px; ${alignStyle}">
+          Dynamic assessment items formulated by the automated generation core to evaluate micro-level concepts.
+        </p>
+      `,
+      estimatedHeight: 60
+    });
+
+    parsed.mcqs.forEach((mcq, mIdx) => {
+      let optionsHTML = '';
+      mcq.options.forEach((opt) => {
+        const optionTextLower = opt.toLowerCase();
+        let isCorrect = false;
+
+        if (mcq.correctAnswer) {
+          const correctKey = mcq.correctAnswer.trim().toLowerCase();
+          if (correctKey.length === 1) {
+            isCorrect = opt.trim().toLowerCase().startsWith(correctKey + ')');
+          } else {
+            isCorrect = optionTextLower.includes(correctKey) || correctKey.includes(optionTextLower);
+          }
+        }
+
+        if (isSolved && isCorrect) {
+          optionsHTML += `
+            <div style="display: flex; align-items: center; ${dirStyle}">
+              <span style="display:inline-flex; align-items:center; justify-content:center; width:15px; height:15px; border:1.5px solid #1E3A8A; border-radius:4px; margin-right:8px; background:#1E3A8A; color:#ffffff; font-size:9px; font-weight:bold;">✔</span>
+              <span style="font-weight: 700; color: #1E3A8A;">${opt}</span>
+            </div>
+          `;
+        } else {
+          optionsHTML += `
+            <div style="display: flex; align-items: center; ${dirStyle}">
+              <span style="display:inline-block; width:15px; height:15px; border:1.5px solid #D4B581; border-radius:4px; margin-right:8px; background:#fff;"></span>
+              <span>${opt}</span>
+            </div>
+          `;
+        }
+      });
+
+      const totalOptionsLen = mcq.options.reduce((sum, o) => sum + o.length, 0);
+      const isGridOptions = totalOptionsLen < 120;
+      const optionWrapperLayout = isGridOptions 
+        ? "display: grid; grid-template-columns: 1fr 1fr; gap: 10px;" 
+        : "display: flex; flex-direction: column; gap: 8px;";
+      
+      const cardHeight = isGridOptions ? 150 : 190;
+
+      blocks.push({
+        html: `
+          <div style="background: white; border: 1.5px solid rgba(212,181,129,0.5); border-radius: 10px; padding: 14px 18px; border-left: 4px solid #1E3A8A; margin-bottom: 16px; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
+            <div style="font-size: 12.5px; font-weight: 700; color: #1E3A8A; line-height: 1.4; margin-bottom: 12px; font-family: 'Georgia', serif; text-align: left; ${dirStyle}">
+              Q${mIdx + 1}. ${mcq.question}
+            </div>
+            <div style="${optionWrapperLayout} font-family: 'Inter', sans-serif; font-size: 10.5px; color: #374151;">
+              ${optionsHTML}
+            </div>
+            ${isSolved && mcq.explanation ? `
+              <div style="margin-top: 10px; padding-top: 8px; border-top: 1px dashed rgba(212,181,129,0.3); font-family: 'Georgia', serif; font-size: 10.5px; color: #4A3E3E; line-height: 1.4; font-style: italic; ${dirStyle}">
+                <strong style="color: #1E3A8A; font-family: 'Inter', sans-serif; font-style: normal; text-transform: uppercase; font-size: 8.5px;">Explanation:</strong> ${mcq.explanation}
+              </div>
+            ` : ''}
+          </div>
+        `,
+        estimatedHeight: cardHeight + (isSolved && mcq.explanation ? 40 : 0)
+      });
+    });
+  }
+
+  // 3. SHORT QUESTIONS BLOCKS
+  if (parsed.shorts.length > 0) {
+    blocks.push({
+      html: `
+        <div style="background: #1E3A8A; color: #D4B581; padding: 4px 14px; border-radius: 6px; display: inline-flex; align-items: center; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 12px; margin-top: 8px;">
+          03 • SHORT QUESTIONS CORE
+        </div>
+      `,
+      estimatedHeight: 40
+    });
+
+    blocks.push({
+      html: `
+        <h3 style="font-family: 'Playfair Display', 'Georgia', serif; font-size: 19px; font-weight: 900; color: #1E3A8A; margin: 0 0 10px 0; ${alignStyle}">
+          Conceptual Response Canvas
+        </h3>
+      `,
+      estimatedHeight: 35
+    });
+
+    parsed.shorts.forEach((short, sIdx) => {
+      if (!isSolved) {
+        blocks.push({
+          html: `
+            <div style="margin-bottom: 20px;">
+              <div style="font-size: 13px; font-weight: 700; color: #1E3A8A; line-height: 1.4; margin-bottom: 10px; font-family: 'Georgia', serif; text-align: left; ${dirStyle}">
+                Q${sIdx + 1}. ${short.question}
+              </div>
+              <div style="border-bottom: 1.2px dotted #B8A6A6; height: 16px; margin-bottom: 8px;"></div>
+              <div style="border-bottom: 1.2px dotted #B8A6A6; height: 16px; margin-bottom: 8px;"></div>
+              <div style="border-bottom: 1.2px dotted #B8A6A6; height: 16px;"></div>
+            </div>
+          `,
+          estimatedHeight: 130
+        });
+      } else {
+        blocks.push({
+          html: `
+            <div style="margin-bottom: 20px; background: white; border: 1.5px solid rgba(212,181,129,0.4); padding: 14px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
+              <div style="font-size: 13px; font-weight: 700; color: #1E3A8A; line-height: 1.4; margin-bottom: 8px; font-family: 'Georgia', serif; text-align: left; ${dirStyle}">
+                Q${sIdx + 1}. ${short.question}
+              </div>
+              <div style="background: #FDFAF3; border-left: 3px solid #D4B581; padding: 10px 12px; border-radius: 4px; font-family: 'Georgia', serif; font-size: 11px; color: #4A3E3E; line-height: 1.5; ${dirStyle}">
+                <strong style="color: #1E3A8A; font-family: 'Inter', sans-serif; font-size: 9px; text-transform: uppercase;">Model Answer:</strong> ${short.modelAnswer}
+              </div>
+              ${short.feedback ? `
+                <div style="margin-top: 8px; font-size: 10.5px; color: #2563EB; font-weight: bold; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 4px; ${dirStyle}">
+                  <span>Assessment Score: ${short.feedback.score}/10 | </span>
+                  <span style="font-weight: 500; font-style: italic; color: #475569;">${short.feedback.text}</span>
+                </div>
+              ` : ''}
+              ${short.userAnswer ? `
+                <div style="margin-top: 6px; font-size: 10.5px; color: #334155; font-family: 'Georgia', serif; ${dirStyle}">
+                  <strong style="color: #1E3A8A; font-family: 'Inter', sans-serif; font-size: 9px; text-transform: uppercase;">Student's Attempt:</strong> "${short.userAnswer}"
+                </div>
+              ` : ''}
+            </div>
+          `,
+          estimatedHeight: 130
+        });
+      }
+    });
+  }
+
+  // 4. LONG QUESTIONS BLOCKS
+  if (parsed.longs.length > 0) {
+    blocks.push({
+      html: `
+        <div style="background: #1E3A8A; color: #D4B581; padding: 4px 14px; border-radius: 6px; display: inline-flex; align-items: center; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 12px; margin-top: 8px;">
+          04 • LONG QUESTIONS ENGINE
+        </div>
+      `,
+      estimatedHeight: 40
+    });
+
+    blocks.push({
+      html: `
+        <h3 style="font-family: 'Playfair Display', 'Georgia', serif; font-size: 19px; font-weight: 900; color: #1E3A8A; margin: 0 0 10px 0; ${alignStyle}">
+          Advanced Analytical Evaluation
+        </h3>
+      `,
+      estimatedHeight: 35
+    });
+
+    parsed.longs.forEach((long, lIdx) => {
+      let rubricLi = '';
+      if (long.keyPoints && long.keyPoints.length > 0) {
+        rubricLi = long.keyPoints.map(kp => `<li style="margin-bottom:3px;">${kp}</li>`).join('');
+      }
+
+      const pointsHeading = isUrdu ? "اہداف برائے تشخیص" : "Target Evaluation Rubric Outlines";
+
+      if (!isSolved) {
+        blocks.push({
+          html: `
+            <div style="background: white; border: 1.5px solid rgba(212,181,129,0.5); border-radius: 10px; padding: 16px 20px; border-left: 4px solid #1E3A8A; margin-bottom: 20px;">
+              <div style="font-size: 13px; font-weight: 700; color: #1E3A8A; line-height: 1.4; margin-bottom: 12px; font-family: 'Georgia', serif; text-align: left; ${dirStyle}">
+                Q${lIdx + 1}. ${long.question}
+              </div>
+              <div style="background: #FDFAF3; border-left: 3px solid #D4B581; padding: 10px 12px; border-radius: 4px; ${dirStyle}">
+                <div style="font-size: 9px; font-weight: 850; color: #1E3A8A; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; font-family: 'Inter', sans-serif;">${pointsHeading}</div>
+                <div style="font-size: 11px; color: #645A5A; font-style: italic; font-family: 'Georgia', serif;">
+                  ${rubricLi ? `<ul style="margin:0; padding-left:14px;">${rubricLi}</ul>` : "Structure the comprehensive analytic response prioritizing structural factors, operational definitions, and comparative case details."}
+                </div>
+              </div>
+            </div>
+          `,
+          estimatedHeight: 140
+        });
+      } else {
+        blocks.push({
+          html: `
+            <div style="background: white; border: 1.5px solid rgba(212,181,129,0.5); border-radius: 10px; padding: 16px 20px; border-left: 4px solid #1E3A8A; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
+              <div style="font-size: 13px; font-weight: 700; color: #1E3A8A; line-height: 1.4; margin-bottom: 12px; font-family: 'Georgia', serif; text-align: left; ${dirStyle}">
+                Q${lIdx + 1}. ${long.question}
+              </div>
+              <div style="background: #FDFAF3; border-left: 3px solid #D4B581; padding: 10px 12px; border-radius: 4px; margin-bottom: 12px; ${dirStyle}">
+                <div style="font-size: 9px; font-weight: 850; color: #1E3A8A; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px; font-family: 'Inter', sans-serif;">Model Analysis Solution Outline</div>
+                <div style="font-size: 11px; color: #2E2222; line-height: 1.5; font-family: 'Georgia', serif; white-space: pre-wrap;">
+                  ${long.modelAnswer}
+                </div>
+              </div>
+              ${rubricLi ? `
+                <div style="font-size: 9.5px; font-weight: 850; color: #1E3A8A; text-transform: uppercase; margin-bottom: 6px; font-family: 'Inter', sans-serif; ${alignStyle}">Key Assessment Framework:</div>
+                <ul style="margin: 0; padding-left: 14px; font-size: 10.5px; color: #555; font-family: 'Georgia', serif; line-height: 1.4; ${dirStyle}">
+                  ${rubricLi}
+                </ul>
+              ` : ''}
+            </div>
+          `,
+          estimatedHeight: Math.max(180, Math.ceil(long.modelAnswer.length / 80) * 16 + 100)
+        });
+      }
+    });
+  }
+
+  // 5. EXAM STATS ROW
+  if (mergedOptions.isExam || parsed.mcqs.length > 0 || parsed.shorts.length > 0) {
+    blocks.push({
+      html: `
+        <div style="background: #1E3A8A; border: 1.5px solid #D4B581; border-radius: 12px; padding: 14px 18px; font-family: 'Inter', sans-serif; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 15px; margin-bottom: 15px;">
+          <div style="background: rgba(255,255,255,0.06); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); text-align: left;">
+            <span style="display:block; font-size: 8.5px; font-weight: 850; color: #D4B581; text-transform: uppercase; letter-spacing: 0.5px;">Session Duration</span>
+            <span style="display:block; font-size: 14px; font-weight: 900; color: #ffffff; margin-top: 3px;">${timeAllowed}</span>
+          </div>
+          <div style="background: rgba(255,255,255,0.06); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); text-align: left;">
+            <span style="display:block; font-size: 8.5px; font-weight: 850; color: #D4B581; text-transform: uppercase; letter-spacing: 0.5px;">Evaluation Target</span>
+            <span style="display:block; font-size: 14px; font-weight: 900; color: #ffffff; margin-top: 3px;">${totalMarks}</span>
+          </div>
+          <div style="background: rgba(255,255,255,0.06); padding: 10px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); text-align: left;">
+            <span style="display:block; font-size: 8.5px; font-weight: 850; color: #D4B581; text-transform: uppercase; letter-spacing: 0.5px;">Evaluation Mode</span>
+            <span style="display:block; font-size: 14px; font-weight: 900; color: #ffffff; margin-top: 3px;">Active</span>
           </div>
         </div>
-      `;
-    }
+      `,
+      estimatedHeight: 90
+    });
+  }
 
-    // Embed Pexels live images selected
-    if (selectedImages.length > 0) {
-      lessonPagesHTML += `
-        <!-- Visual Aids Panel -->
-        <div style="border: 1px solid #E2E8F0; border-radius: 12px; padding: 16px; background: white; text-align: center;">
-          <div style="font-weight: 800; color: #1B4332; font-size: 11px; text-transform: uppercase; margin-bottom: 12px; tracking: 0.5px; text-align: left;">Live Visual Reference:</div>
-          <div style="display: flex; justify-content: center; align-items: center; max-height: 250px; overflow: hidden; border-radius: 8px; border: 1.2px solid #E6F4ED; background: #fafdfc;">
-            <img src="${selectedImages[0].text}" style="width: 100%; max-height: 250px; object-fit: contain;" />
-          </div>
-          <p style="font-size: 10px; font-weight: 700; color: #059669; margin: 8px 0 0 0;">📸 Pexels Live Academic Schematic Reference Picture</p>
-        </div>
-      `;
-    }
-
-    lessonPagesHTML += `
-        </div>
+  // --- ARBITRARY WORDPRESS FALLBACK / SMART SUITE ---
+  if (blocks.length === 0) {
+    let adaptiveHTML = elegantHeaderHTML + `
+      <div style="background: #1E3A8A; color: #D4B581; padding: 4px 14px; border-radius: 6px; display: inline-flex; align-items: center; font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 900; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 18px;">
+        EG • ACADEMIC SMART SUITE MODULE
       </div>
+      <h3 style="font-family: 'Playfair Display', 'Georgia', serif; font-size: 21px; font-weight: 900; color: #1E3A8A; margin: 0 0 12px 0;">
+        ${title} Workspace Outputs
+      </h3>
+      <div style="display: flex; flex-direction: column; gap: 18px; font-family: 'Inter', sans-serif;">
     `;
 
-    pages.push({ title: 'Lesson Details', elementsHTML: lessonPagesHTML, showFooterPageNum: true });
+    content.forEach((item, idx) => {
+      if (item.type === 'heading' && idx > 0) {
+        adaptiveHTML += `
+          <div style="font-size: 14px; font-weight: 850; color: #1E3A8A; font-family: 'Playfair Display', Georgia, serif; border-bottom: 1px solid #DFBA6B; padding-bottom: 4px; margin-top: 10px;">
+            ${item.text}
+          </div>
+        `;
+      } else if (item.type === 'subheading') {
+        adaptiveHTML += `
+          <div style="font-size: 11.5px; font-weight: 700; color: #DFBA6B; text-transform: uppercase; letter-spacing: 0.5px;">
+            ${item.text}
+          </div>
+        `;
+      } else if (item.type === 'text' && item.text) {
+        if (item.text.startsWith('•') || item.text.startsWith('-')) {
+          adaptiveHTML += `
+            <div style="font-size: 11.5px; color: #374151; padding-left: 10px; line-height: 1.5;">
+              ${item.text}
+            </div>
+          `;
+        } else {
+          adaptiveHTML += `
+            <div style="background: white; border: 1.2px solid #E6DFD5; border-radius: 10px; padding: 12px 16px; border-left: 3.5px solid #0F172A; font-size: 11px; color: #2D2525; line-height: 1.6; text-align: justify; box-shadow: 0 2px 4px rgba(0,0,0,0.01);">
+              ${item.text}
+            </div>
+          `;
+        }
+      } else if (item.type === 'blankLines' && item.count) {
+        for (let l = 0; l < (item.count || 2); l++) {
+          adaptiveHTML += `<div style="border-bottom: 1.2px dotted #B8A6A6; height: 16px; margin-bottom: 8px;"></div>`;
+        }
+      }
+    });
+
+    adaptiveHTML += `</div>`;
+    pages.push({ title: 'Workspace Output', elementsHTML: adaptiveHTML, showFooterPageNum: true });
+
+  } else {
+    // --- DISTRIBUTE BUDGETED BLOCK STREAM OVER A4 PAGES ---
+    let currentPageHTML = elegantHeaderHTML;
+    let currentPageHeight = 0;
+    const pageHeightLimit = 860; // Max pixels inside 1130 total page height
+
+    blocks.forEach((block) => {
+      if (currentPageHeight + block.estimatedHeight > pageHeightLimit) {
+        pages.push({
+          title: topic,
+          elementsHTML: currentPageHTML,
+          showFooterPageNum: true
+        });
+        
+        currentPageHTML = elegantHeaderHTML + block.html;
+        currentPageHeight = block.estimatedHeight;
+      } else {
+        currentPageHTML += block.html;
+        currentPageHeight += block.estimatedHeight;
+      }
+    });
+
+    if (currentPageHeight > 0) {
+      pages.push({
+        title: topic,
+        elementsHTML: currentPageHTML,
+        showFooterPageNum: true
+      });
+    }
   }
 
   // BUILD THE RENDERED PAGES COLLECTION TO HIDDEN STAGE
@@ -754,45 +1048,40 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
   const countTotalPages = pages.length;
 
   pages.forEach((pageItem, index) => {
+    const isCover = pageItem.title === 'Cover Page';
     const pageDiv = document.createElement('div');
     pageDiv.className = 'page-render-unit';
     pageDiv.style.width = '800px';
-    pageDiv.style.height = '1130px'; // Math perfect vertical portrait aspect ratio matching A4 unit
-    pageDiv.style.background = '#FAFDFB';
-    pageDiv.style.padding = '55px 50px';
+    pageDiv.style.height = '1130px'; 
+    pageDiv.style.background = isCover ? '#0F172A' : '#FCFAF7'; // Perfect edge-to-edge matching background!
+    pageDiv.style.padding = isCover ? '0' : '55px 50px'; // Escape any boundaries for cover page
     pageDiv.style.boxSizing = 'border-box';
     pageDiv.style.fontFamily = isUrdu ? "'Noto Naskh Arabic', 'Inter', sans-serif" : "'Inter', system-ui, sans-serif";
     pageDiv.style.display = 'flex';
     pageDiv.style.flexDirection = 'column';
     pageDiv.style.justifyContent = 'space-between';
-    pageDiv.style.border = '1px solid #E2E8F0';
+    pageDiv.style.border = isCover ? 'none' : '1px solid #E2E8F0';
     pageDiv.style.position = 'relative';
 
-    const footerText = isUrdu ? "صرف کورس ورک کے خفیہ استعمال کے لیے" : "CONFIDENTIAL STUDENT USE ONLY";
-    const indicatorStr = `${String(index + 1).padStart(2, '0')} / ${String(countTotalPages).padStart(2, '0')}`;
+    const footerText = isUrdu ? "صرف کورس ورک کے خفیہ استعمال کے لیے" : "EDUGEN INTELLIGENCE SYSTEM • UNIFIED ENGINE V5.0";
+    const indicatorStr = `Page ${index + 1}`;
 
     pageDiv.innerHTML = `
       <!-- Page Content body -->
-      <div style="flex-grow: 1;">
+      <div style="flex-grow: 1; ${isCover ? 'height: 100%; display: flex; flex-direction: column;' : ''}">
         ${pageItem.elementsHTML}
       </div>
 
-      <!-- Perfect portrait page footer -->
+      <!-- Perfect portrait page footer match -->
       ${pageItem.showFooterPageNum !== false ? `
-        <div style="border-top: 1.5px solid #E6F4ED; padding-top: 12px; margin-top: 12px; display: flex; justify-content: space-between; align-items: center; font-family: 'Inter', sans-serif;">
+        <div style="border-top: 1.5px solid #DFBA6B; padding-top: 10px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; font-family: 'Playfair Display', Georgia, serif; font-style: italic;">
           <!-- Left branded info -->
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="background-color: #19CE86; width: 22px; height: 22px; border-radius: 5px; display: flex; justify-content: center; align-items: center; font-size: 10px; font-weight: 900; color: white;">EG</div>
-            <span style="font-size: 11.5px; font-weight: 800; color: #064E3B; letter-spacing: -0.2px;">edugenn.lovable.app</span>
-          </div>
-
-          <!-- Center privacy notice -->
-          <div style="font-size: 9px; font-weight: 850; color: #94A3B8; letter-spacing: 1.2px; text-transform: uppercase;">
+          <div style="font-size: 10.5px; font-weight: 700; color: #1E3A8A; letter-spacing: 0.5px;">
             ${footerText}
           </div>
 
           <!-- Right page count indicator -->
-          <div style="font-size: 11.5px; font-weight: 800; color: #059669; letter-spacing: -0.2px;">
+          <div style="font-size: 11px; font-weight: 800; color: #1E3A8A;">
             ${indicatorStr}
           </div>
         </div>
@@ -803,14 +1092,31 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
     pageElements.push(pageDiv);
   });
 
+  const removedSheets: { node: HTMLStyleElement | HTMLLinkElement; parent: Node; nextSibling: Node | null }[] = [];
   try {
+    // Temporarily remove non-essential stylesheets (like Tailwind v4 styles containing oklch)
+    // which html2canvas fails to parse even when disabled. We keep Google Fonts stylesheets intact.
+    document.querySelectorAll('style, link[rel="stylesheet"]').forEach((node) => {
+      const el = node as HTMLStyleElement | HTMLLinkElement;
+      if (el instanceof HTMLLinkElement && el.href && (el.href.includes('fonts.googleapis.com') || el.href.includes('fonts.gstatic.com'))) {
+        return;
+      }
+      if (el.parentNode) {
+        removedSheets.push({
+          node: el,
+          parent: el.parentNode,
+          nextSibling: el.nextSibling
+        });
+        el.parentNode.removeChild(el);
+      }
+    });
+
     const doc = new jsPDF({
       orientation: 'p',
       unit: 'mm',
       format: 'a4'
     });
 
-    // Capture each page div separately and write directly on a portrait PDF page!
     for (let pageIdx = 0; pageIdx < pageElements.length; pageIdx++) {
       const activeDiv = pageElements[pageIdx];
       
@@ -819,16 +1125,16 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
       }
 
       const canvas = await html2canvas(activeDiv, {
-        scale: 2.2, // Crystal sharp high-density outputs
+        scale: 2.2, 
         useCORS: true,
-        backgroundColor: '#FAFDFB',
+        backgroundColor: '#FCFAF7',
         width: 800,
         height: 1130,
         logging: false,
       });
 
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      doc.addImage(imgData, 'JPEG', 0, 0, 210, 297); // 210mm x 297mm matches A4 portrait exactly
+      doc.addImage(imgData, 'JPEG', 0, 0, 210, 297); 
     }
 
     const dStamp = new Date().toLocaleDateString('en-GB').replace(/\//g, '');
@@ -839,7 +1145,22 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
   } catch (err) {
     console.error("Document portrait export engine layout error:", err);
   } finally {
-    // Remove temporary rendering divs in all cases
+    // Restore the temporarily removed stylesheets in their original position
+    removedSheets.forEach(({ node, parent, nextSibling }) => {
+      try {
+        if (nextSibling && nextSibling.parentNode === parent) {
+          parent.insertBefore(node, nextSibling);
+        } else {
+          parent.appendChild(node);
+        }
+      } catch (restoreErr) {
+        try {
+          parent.appendChild(node);
+        } catch (e) {}
+      }
+    });
+
+    // Remove temporary rendering divs
     if (container.parentNode) container.parentNode.removeChild(container);
     if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
   }

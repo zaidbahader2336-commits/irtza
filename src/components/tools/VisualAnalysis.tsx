@@ -73,7 +73,7 @@ export default function VisualAnalysis({ onDownload }: Props) {
   const [convertedImages, setConvertedImages] = useState<{data: string, mimeType: string}[]>([]);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [pdfText, setPdfText] = useState<string>('');
-  const [classLevel, setClassLevel] = useState('High School (Grade 9-10)');
+  const [classLevel, setClassLevel] = useState('Undergraduate / College');
   const [language, setLanguage] = useState('English');
   const [task, setTask] = useState('solve');
   const [instructions, setInstructions] = useState('');

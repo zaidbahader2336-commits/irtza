@@ -18,7 +18,6 @@ import { cn } from '../../lib/utils';
 import { User, ToolType } from '../../types';
 import { getUserHistory, deleteHistoryItem } from '../../lib/userData';
 import { generatePDF } from '../../lib/pdf';
-import ShareEduGen from './ShareEduGen';
 
 interface HistoryProps {
   onDownload: (name: string) => void;
@@ -50,6 +49,94 @@ export default function History({ onDownload }: HistoryProps) {
           { type: 'text', text: `Explanation: ${q.explanation}` },
         ])).flat()
       ];
+    } else if (type === 'shortQs') {
+      content = [
+        { type: 'heading', text: `${topic} Short Questions` },
+        ...(data as any[]).map((q, i) => ([
+          { type: 'subheading', text: `Q${i + 1}: ${q.question}` },
+          { type: 'text', text: `Model Answer: ${q.modelAnswer}` },
+          q.userAnswer ? { type: 'text', text: `Your Answer: ${q.userAnswer}` } : null,
+          q.feedback ? { type: 'text', text: `Feedback Score: ${q.feedback.score}/10 - ${q.feedback.text}` } : null
+        ].filter(Boolean))).flat()
+      ];
+    } else if (type === 'longQs') {
+      content = [
+        { type: 'heading', text: `${topic} Long Essay Explanations` },
+        ...(data as any[]).map((q, i) => ([
+          { type: 'subheading', text: `Q${i + 1}: ${q.question}` },
+          { type: 'text', text: `Model Essay Answer:\n${q.modelAnswer}` },
+          ...(q.keyPoints || []).map((kp: string) => ({ type: 'text', text: `• ${kp}` })),
+          q.diagramDescription ? { type: 'text', text: `Visual Reference Aspect: ${q.diagramDescription}` } : null
+        ].filter(Boolean))).flat()
+      ];
+    } else if (type === 'exams') {
+      content = [
+        { type: 'heading', text: `${topic} Term Exam Practice` },
+      ];
+      if (data.mcqs && data.mcqs.length > 0) {
+        content.push({ type: 'heading', text: 'Section A: Multiple Choice Questions' });
+        data.mcqs.forEach((q: any, i: number) => {
+          content.push({ type: 'subheading', text: `Question ${i + 1}: ${q.question}` });
+          q.options.forEach((opt: string, oi: number) => {
+            content.push({ type: 'text', text: `${String.fromCharCode(65 + oi)}) ${opt}` });
+          });
+          content.push({ type: 'text', text: `Correct Answer: ${q.options[q.correctIndex] || q.correctAnswer}` });
+          content.push({ type: 'text', text: `Explanation: ${q.explanation}` });
+        });
+      }
+      if (data.shortQuestions && data.shortQuestions.length > 0) {
+        content.push({ type: 'heading', text: 'Section B: Short Practice Questions' });
+        data.shortQuestions.forEach((q: any, i: number) => {
+          content.push({ type: 'subheading', text: `Q${i + 1}: ${q.question}` });
+          content.push({ type: 'text', text: `Model Answer: ${q.modelAnswer}` });
+        });
+      }
+      if (data.longQuestions && data.longQuestions.length > 0) {
+        content.push({ type: 'heading', text: 'Section C: Essay Questions' });
+        data.longQuestions.forEach((q: any, i: number) => {
+          content.push({ type: 'subheading', text: `Q${i + 1}: ${q.question}` });
+          content.push({ type: 'text', text: `Model Answer: ${q.modelAnswer}` });
+          if (q.keyPoints) {
+            q.keyPoints.forEach((kp: string) => {
+              content.push({ type: 'text', text: `• ${kp}` });
+            });
+          }
+        });
+      }
+    } else if (type === 'stories') {
+      content = [
+        { type: 'heading', text: data.title || topic },
+        { type: 'text', text: data.content }
+      ];
+    } else if (type === 'letters') {
+      content = [
+        { type: 'heading', text: data.subject || topic },
+        { type: 'text', text: data.body }
+      ];
+    } else if (type === 'explanations') {
+      content = [
+        { type: 'heading', text: data.title || topic },
+        { type: 'subheading', text: 'Executive Summary' },
+        { type: 'text', text: data.summary },
+        { type: 'heading', text: 'Key Concepts' },
+        ...(data.keyConcepts || []).map((c: string) => ({ type: 'text', text: `• ${c}` })),
+        { type: 'heading', text: 'Real World Analogy' },
+        { type: 'text', text: data.analogy },
+      ];
+      if (data.detailedExplanation) {
+        content.push({ type: 'heading', text: 'Detailed Analysis' });
+        content.push({ type: 'text', text: data.detailedExplanation });
+      }
+      if (data.diagramDescription) {
+        content.push({ type: 'heading', text: 'Visual Reference Description' });
+        content.push({ type: 'text', text: data.diagramDescription });
+      }
+      if (data.misconceptions) {
+        content.push({ type: 'heading', text: 'Common Misconceptions' });
+        data.misconceptions.forEach((m: string) => {
+          content.push({ type: 'text', text: `[!] ${m}` });
+        });
+      }
     } else {
       content = [
         { type: 'heading', text: `${topic} Study Notes` },
@@ -57,8 +144,8 @@ export default function History({ onDownload }: HistoryProps) {
       ];
     }
     
-    alert("Re-downloading study guide from Vault...");
-    onDownload(`${topic} from history`);
+    generatePDF(`${topic} Re-download`, content);
+    onDownload(`${topic} Re-download`);
   };
 
   if (!currentUser) return null;
@@ -184,9 +271,6 @@ export default function History({ onDownload }: HistoryProps) {
             ))}
          </div>
        )}
-       <div className="mt-8 pt-6 border-t border-[#E2E8F0]">
-         <ShareEduGen isBanner={true} />
-       </div>
     </div>
   );
 }

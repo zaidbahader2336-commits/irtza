@@ -1,41 +1,138 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Playfair Display", ui-serif, Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   
-  --color-primary-dark: #064E3B;
-  --color-primary-light: #E6F7F0;
-  --color-accent-mint: #19CE86;
-  --color-accent-emerald: #059669;
+  --color-primary-dark: #4A191F;
+  --color-primary-light: #FDFAF3;
+  --color-accent-mint: #D4B581;
+  --color-accent-emerald: #5C2228;
   
-  /* Override Indigo classes for automatic backward compatibility in theme swapping */
-  --color-indigo-50: #FAFCFA;
-  --color-indigo-100: #E6F7F0;
-  --color-indigo-205: #D1FAE5;
-  --color-indigo-500: #10B981;
-  --color-indigo-600: #059669;
-  --color-indigo-700: #047857;
-  --color-indigo-800: #064E3B;
-  --color-indigo-900: #022C22;
+  /* Overrides for dynamic backward compatibility with existing styles */
+  --color-indigo-50: #FDFAF3;
+  --color-indigo-100: #F3EBDA;
+  --color-indigo-200: #E4D6BE;
+  --color-indigo-500: #D4B581;
+  --color-indigo-600: #5C2228;
+  --color-indigo-700: #4A191F;
+  --color-indigo-800: #2C0F12;
+  --color-indigo-900: #190507;
   
-  /* Override Blue classes for automatic backward compatibility in theme swapping */
-  --color-blue-50: #FAFCFA;
-  --color-blue-100: #E6F7F0;
-  --color-blue-500: #10B981;
-  --color-blue-600: #059669;
-  --color-blue-700: #047857;
-  --color-blue-800: #064E3B;
-  --color-blue-900: #022C22;
+  --color-blue-50: #FDFAF3;
+  --color-blue-100: #F3EBDA;
+  --color-blue-200: #E4D6BE;
+  --color-blue-500: #D4B581;
+  --color-blue-600: #5C2228;
+  --color-blue-700: #4A191F;
+  --color-blue-800: #2C0F12;
+  --color-blue-900: #190507;
+
+  --color-emerald-50: #FDFAF3;
+  --color-emerald-100: #F3EBDA;
+  --color-emerald-200: #E4D6BE;
+  --color-emerald-300: #D4B581;
+  --color-emerald-500: #D4B581;
+  --color-emerald-600: #5C2228;
+  --color-emerald-700: #4A191F;
+  --color-emerald-800: #2C0F12;
+  --color-emerald-950: #190507;
 }
 
 @layer base {
   body {
-    @apply bg-[#FAFDFB] text-[#0F172A];
+    background-color: #F3EBDA !important;
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E") !important;
+    @apply text-slate-800 antialiased font-sans;
+  }
+  
+  h1, h2, h3, h4, h5, h6, .serif-academic {
+    font-family: "Playfair Display", Georgia, serif;
+    @apply tracking-wide;
   }
 }
 
+/* Paper Parchment & Academic Textures */
+.paper-texture {
+  background-color: #F3EBDA !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E") !important;
+}
+
+.hero-texture {
+  background-color: #FDFAF3 !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E") !important;
+}
+
+/* High-Quality Institutional Overrides for Universal Styling */
+.bg-white {
+  background-color: #FDFAF3 !important; /* Premium Parchment Cream as standard background */
+}
+
+.bg-slate-50, .bg-gray-50, .bg-[#F8FAFF] {
+  background-color: #F3EBDA !important; /* Soft paper highlight as secondary bg */
+}
+
+.border-slate-100, .border-slate-200, .border-gray-100, .border-gray-200, .border-[#E2E8F0] {
+  border-color: #D4B581 !important; /* Gold border lines as universal standard */
+}
+
+/* Flat structural borders over round colorful cards */
+.rounded-2xl {
+  border-radius: 8px !important;
+}
+.rounded-xl {
+  border-radius: 6px !important;
+}
+.rounded-lg {
+  border-radius: 4px !important;
+}
+
+/* Remove modern glow-shadows in favor of flat paper aesthetic or simple elegant framing */
+.shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl {
+  box-shadow: 0 4px 12px rgba(74, 25, 31, 0.05) !important;
+}
+
+/* Double Border Accent Box */
+.academic-card {
+  background-color: #FDFAF3 !important;
+  border: 1px solid #D4B581 !important;
+  padding: 4px !important;
+}
+.academic-card-inner {
+  border: 1px solid #D4B581 !important;
+  height: 100%;
+  padding: 1.5rem;
+}
+
+/* Styled Inputs & Selects */
+input[type="text"], input[type="password"], select, textarea {
+  background-color: #FDFAF3 !important;
+  border: 1px solid #D4B581 !important;
+  color: #190507 !important;
+  box-shadow: none !important;
+  border-radius: 4px !important;
+}
+input[type="text"]:focus, input[type="password"]:focus, select:focus, textarea:focus {
+  border-color: #1E3A8A !important;
+  outline: none !important;
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #FDFAF3;
+}
+::-webkit-scrollbar-thumb {
+  background-color: #1E3A8A;
+  border-radius: 4px;
+}
+
+/* Animations */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -46,17 +143,99 @@
 }
 
 .shimmer {
-  background: linear-gradient(90deg, #FAFCFA 25%, #E6F7F0 50%, #FAFCFA 75%);
+  background: linear-gradient(90deg, #FDFAF3 25%, #F3EBDA 50%, #FDFAF3 75%);
   background-size: 200% 100%;
   animation: shimmer 1.8s infinite linear;
 }
 
 @keyframes pulse-soft {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(0.98); }
+  50% { opacity: 0.7; transform: scale(0.99); }
 }
 
 .pulse-soft {
-  animation: pulse-soft 2s infinite ease-in-out;
+  animation: pulse-soft 2.5s infinite ease-in-out;
 }
+
+/* Intercept and swap hardcoded blue/indigo variables and utility classes to dark academic navy blue */
+.text-[#6366F1], .text-indigo-600 {
+  color: #1E3A8A !important;
+}
+
+.bg-[#6366F1], .bg-indigo-600 {
+  background-color: #1E3A8A !important;
+}
+
+.bg-[#6366F1]\/10, .bg-indigo-50, .bg-indigo-50\/50, .bg-indigo-50\/55, .bg-amber-50\/55 {
+  background-color: #EFF6FF !important;
+}
+
+.border-[#6366F1], .border-indigo-500, .border-indigo-600 {
+  border-color: #93C5FD !important;
+}
+
+.bg-gradient-to-r.from-\[\#6366F1\].to-\[\#3B82F6\],
+.bg-gradient-to-r.from-\[\#4A121A\].to-\[\#5C1D24\],
+.bg-gradient-to-r.from-\[\#4A121A\].to-\[\#DFBA6B\] {
+  background-image: linear-gradient(to right, #0F172A, #1E3A8A) !important;
+  color: #FDFAF3 !important;
+}
+
+.bg-gradient-to-br.from-\[\#4A121A\].to-\[\#DFBA6B\] {
+  background-image: linear-gradient(135deg, #0F172A, #D4B581) !important;
+}
+
+.bg-\[\#F8FAFF\] {
+  background-color: #F8FAFF !important;
+}
+
+.bg-\[\#FDFBF7\], .bg-\[\#FDFAF3\] {
+  background-color: #FDFAF3 !important;
+}
+
+/* Elegant badges for scholastic environments */
+.badge-academic {
+  @apply px-3 py-1 border border-[#D4B581] bg-[#1E3A8A]/5 text-[#1E3A8A] rounded-sm text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1.5;
+}
+
+/* Form fields customization */
+select, input[type="text"], textarea {
+  background-color: #FDFAF3 !important;
+  border: 1px solid #D4B581 !important;
+  color: #1E293B !important;
+  border-radius: 4px !important;
+  padding: 0.5rem 0.75rem !important;
+  font-size: 0.875rem !important;
+  transition: all 0.2s ease-in-out;
+}
+select:focus, input[type="text"]:focus, textarea:focus {
+  border-color: #1E3A8A !important;
+  border-radius: 4px !important;
+  outline: none !important;
+}
+
+/* Buttons upgrade */
+button:not([disabled]).bg-gradient-to-r,
+button:not([disabled]).bg-indigo-600,
+button:not([disabled]).bg-blue-600 {
+  background-image: linear-gradient(to right, #0F172A, #2563EB) !important;
+  border: 1px solid rgba(212, 181, 129, 0.5) !important;
+  color: #FDFAF3 !important;
+  border-radius: 4px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 6px -1px rgba(30, 58, 138, 0.1), 0 2px 4px -1px rgba(30, 58, 138, 0.06) !important;
+  transition: all 0.2s ease-in-out;
+}
+button:not([disabled]).bg-gradient-to-r:hover,
+button:not([disabled]).bg-indigo-600:hover,
+button:not([disabled]).bg-blue-600:hover {
+  filter: brightness(1.1) !important;
+}
+button:not([disabled]).bg-gradient-to-r:active,
+button:not([disabled]).bg-indigo-600:active,
+button:not([disabled]).bg-blue-600:active {
+  transform: scale(0.98) !important;
+}
+
+
 

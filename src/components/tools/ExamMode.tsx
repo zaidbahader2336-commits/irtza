@@ -19,7 +19,7 @@ import {
 import { cn } from '../../lib/utils';
 import { ExamPaper, MCQ, ShortQuestion, LongQuestion } from '../../types';
 import { generatePDF, PDFItem } from '../../lib/pdf';
-import { saveToUserHistory } from '../../lib/userData';
+import { saveToUserHistory, getOrCreateDefaultUser } from '../../lib/userData';
 
 type ExamStatus = 'setup' | 'active' | 'results';
 
@@ -49,11 +49,11 @@ const LANGUAGES = [
 export default function ExamMode({ onDownload }: ExamModeProps) {
   // Setup State
   const [topic, setTopic] = useState('');
-  const [duration, setDuration] = useState(60);
-  const [mcqCount, setMcqCount] = useState(10);
-  const [shortCount, setShortCount] = useState(5);
-  const [longCount, setLongCount] = useState(2);
-  const [gradeLevel, setGradeLevel] = useState('High School (Grade 9-10)');
+  const [duration, setDuration] = useState(45);
+  const [mcqCount, setMcqCount] = useState(3);
+  const [shortCount, setShortCount] = useState(3);
+  const [longCount, setLongCount] = useState(3);
+  const [gradeLevel, setGradeLevel] = useState('Undergraduate / College');
   const [language, setLanguage] = useState('English');
   const [status, setStatus] = useState<ExamStatus>('setup');
 
@@ -67,6 +67,10 @@ export default function ExamMode({ onDownload }: ExamModeProps) {
   const [userAnswers, setUserAnswers] = useState<Record<string, any>>({});
   const [flagged, setFlagged] = useState<string[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // Start fresh - require user input
+  }, []);
 
   // Results State
   const [results, setResults] = useState<{ mcqScore: number; maxMcq: number } | null>(null);

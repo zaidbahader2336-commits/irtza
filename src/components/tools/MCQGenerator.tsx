@@ -15,7 +15,7 @@ import {
 import { cn } from '../../lib/utils';
 import { MCQ } from '../../types';
 import { generatePDF, PDFItem } from '../../lib/pdf';
-import { saveToUserHistory } from '../../lib/userData';
+import { saveToUserHistory, getOrCreateDefaultUser } from '../../lib/userData';
 import confetti from 'canvas-confetti';
 
 interface Props {
@@ -43,9 +43,9 @@ const LANGUAGES = [
 
 export default function MCQGenerator({ onDownload }: Props) {
   const [topic, setTopic] = useState('');
-  const [count, setCount] = useState(10);
-  const [difficulty, setDifficulty] = useState('Medium');
-  const [gradeLevel, setGradeLevel] = useState('High School (Grade 9-10)');
+  const [count, setCount] = useState(3);
+  const [difficulty, setDifficulty] = useState('Hard');
+  const [gradeLevel, setGradeLevel] = useState('Undergraduate / College');
   const [language, setLanguage] = useState('English');
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<MCQ[]>([]);
@@ -60,6 +60,10 @@ export default function MCQGenerator({ onDownload }: Props) {
 
   // Score Count-Up Animator
   const [animatedScore, setAnimatedScore] = useState(0);
+
+  useEffect(() => {
+    // Start fresh - require user input
+  }, []);
 
   useEffect(() => {
     if (quizFinished) {

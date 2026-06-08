@@ -18,12 +18,14 @@ async function startServer() {
   app.use(express.json());
 
   // Helper for Groq JSON completion
-  async function getGroqCompletion(prompt: string, systemPrompt?: string) {
-    if (!groq) {
-      throw new Error("GROQ_API_KEY is not configured. Please add it to your secrets.");
+  async function getGroqCompletion(prompt: string, systemPrompt?: string, userKey?: string) {
+    const activeKey = userKey || process.env.GROQ_API_KEY;
+    if (!activeKey) {
+      throw new Error("GROQ_API_KEY is not configured. Please add it to your secrets or paste it in App Settings.");
     }
 
-    const chatCompletion = await groq.chat.completions.create({
+    const client = new Groq({ apiKey: activeKey });
+    const chatCompletion = await client.chat.completions.create({
       messages: [
         {
           role: "system",
@@ -45,12 +47,14 @@ async function startServer() {
   }
 
   // Helper for Groq raw non-JSON completion
-  async function getGroqRawCompletion(prompt: string, systemPrompt?: string) {
-    if (!groq) {
-      throw new Error("GROQ_API_KEY is not configured. Please add it to your secrets.");
+  async function getGroqRawCompletion(prompt: string, systemPrompt?: string, userKey?: string) {
+    const activeKey = userKey || process.env.GROQ_API_KEY;
+    if (!activeKey) {
+      throw new Error("GROQ_API_KEY is not configured. Please add it to your secrets or paste it in App Settings.");
     }
 
-    const chatCompletion = await groq.chat.completions.create({
+    const client = new Groq({ apiKey: activeKey });
+    const chatCompletion = await client.chat.completions.create({
       messages: [
         {
           role: "system",
@@ -71,7 +75,7 @@ async function startServer() {
 
   // Tool 1: MCQ Generator
   app.post("/api/mcqs", async (req, res) => {
-    const { topic, count, difficulty, gradeLevel, language } = req.body;
+    const { topic, count, difficulty, gradeLevel, language, userKey } = req.body;
     try {
       const prompt = `Generate ${count} multiple choice questions about "${topic}".
       Target Grade Level: ${gradeLevel || difficulty || "High School"}
@@ -81,7 +85,7 @@ async function startServer() {
       Return a JSON object with a "questions" key containing an array of objects.
       Each object must have: "question" (string), "options" (array of 4 strings), "correctIndex" (integer 0-3), and "explanation" (string).`;
       
-      const result = await getGroqCompletion(prompt);
+      const result = await getGroqCompletion(prompt, undefined, userKey);
       const parsed = JSON.parse(result || '{"questions": []}');
       res.json(parsed.questions || []);
     } catch (error: any) {
@@ -92,7 +96,7 @@ async function startServer() {
 
   // Tool 2: Short Questions
   app.post("/api/short-questions", async (req, res) => {
-    const { topic, count, gradeLevel, language } = req.body;
+    const { topic, count, gradeLevel, language, userKey } = req.body;
     try {
       const prompt = `Generate ${count} short academic questions about "${topic}". 
       Target Grade Level: ${gradeLevel || "High School"}
@@ -103,7 +107,7 @@ async function startServer() {
       Return a JSON object with a "questions" key containing an array of objects.
       Each object must have: "question" (string) and "modelAnswer" (string).`;
       
-      const result = await getGroqCompletion(prompt);
+      const result = await getGroqCompletion(prompt, undefined, userKey);
       const parsed = JSON.parse(result || '{"questions": []}');
       res.json(parsed.questions || []);
     } catch (error: any) {
@@ -113,7 +117,7 @@ async function startServer() {
   });
 
   app.post("/api/check-short-answer", async (req, res) => {
-    const { question, modelAnswer, userAnswer, language } = req.body;
+    const { question, modelAnswer, userAnswer, language, userKey } = req.body;
     try {
       const prompt = `Question: ${question}\nModel Answer: ${modelAnswer}\nUser Answer: ${userAnswer}\n\n
       Target Language for assessment response: ${language || "English"}.
@@ -121,7 +125,7 @@ async function startServer() {
       Write all feedback, score justifications, and improvement bullet lists entirely in the requested target language: ${language || "English"}.
       Return a JSON object with: "score" (number 0-10), "feedback" (string), and "improvement" (string).`;
       
-      const result = await getGroqCompletion(prompt);
+      const result = await getGroqCompletion(prompt, undefined, userKey);
       res.json(JSON.parse(result || "{}"));
     } catch (error: any) {
       res.status(500).json({ error: "Failed to check answer" });
@@ -130,7 +134,7 @@ async function startServer() {
 
   // Tool 3: Long Questions
   app.post("/api/long-questions", async (req, res) => {
-    const { topic, count, gradeLevel, language } = req.body;
+    const { topic, count, gradeLevel, language, userKey } = req.body;
     try {
       const prompt = `Generate ${count} essay-style long structural questions about "${topic}". 
       Target Grade Level: ${gradeLevel || "High School"}
@@ -144,7 +148,7 @@ async function startServer() {
       Return a JSON object with a "questions" key containing an array of objects.
       Each object must have: "question" (string), "modelAnswer" (string), and "keyPoints" (array of strings).`;
       
-      const result = await getGroqCompletion(prompt);
+      const result = await getGroqCompletion(prompt, undefined, userKey);
       const parsed = JSON.parse(result || '{"questions": []}');
       res.json(parsed.questions || []);
     } catch (error: any) {
@@ -154,7 +158,7 @@ async function startServer() {
 
   // Tool 4: Topic Explainer
   app.post("/api/explain-topic", async (req, res) => {
-    const { topic, level, gradeLevel, language } = req.body;
+    const { topic, level, gradeLevel, language, userKey } = req.body;
     const finalLevel = gradeLevel || level || "High School";
     try {
       const prompt = `Explain "${topic}" designed specifically for a student at the ${finalLevel} grade level.
@@ -172,7 +176,7 @@ async function startServer() {
       
       Return a JSON object with: "title" (string), "summary" (string), "keyConcepts" (array of strings), "analogy" (string), "misconceptions" (array of strings), "detailedExplanation" (string, markdown), and "diagramDescription" (string).`;
       
-      const result = await getGroqCompletion(prompt);
+      const result = await getGroqCompletion(prompt, undefined, userKey);
       res.json(JSON.parse(result || "{}"));
     } catch (error: any) {
       res.status(500).json({ error: "Failed to explain topic" });
@@ -181,7 +185,7 @@ async function startServer() {
 
   // Tool 5: Story & Letter
   app.post("/api/write-story", async (req, res) => {
-    const { theme, tone, gradeLevel, language } = req.body;
+    const { theme, tone, gradeLevel, language, userKey } = req.body;
     try {
       const prompt = `Write a short story (300-500 words) with the theme/prompt: "${theme}" in a ${tone} tone suitable for ${gradeLevel || "High School"} level.
       Target Language: ${language || "English"}
@@ -189,7 +193,7 @@ async function startServer() {
       Write the story and title entirely in the requested target language: ${language || "English"}.
       Return a JSON object with: "title" (string) and "content" (string).`;
       
-      const result = await getGroqCompletion(prompt);
+      const result = await getGroqCompletion(prompt, undefined, userKey);
       res.json(JSON.parse(result || "{}"));
     } catch (error: any) {
       res.status(500).json({ error: "Failed to write story" });
@@ -197,7 +201,7 @@ async function startServer() {
   });
 
   app.post("/api/write-letter", async (req, res) => {
-    const { type, details, gradeLevel, language } = req.body;
+    const { type, details, gradeLevel, language, userKey } = req.body;
     try {
       const prompt = `Write a complete formal ${type} based on these details: "${details}", suited for ${gradeLevel || "High School"} reading level.
       Target Language: ${language || "English"}
@@ -205,7 +209,7 @@ async function startServer() {
       Write the letters, subject lines, and signatures entirely in the requested target language: ${language || "English"}.
       Return a JSON object with: "subject" (string) and "body" (string).`;
       
-      const result = await getGroqCompletion(prompt);
+      const result = await getGroqCompletion(prompt, undefined, userKey);
       res.json(JSON.parse(result || "{}"));
     } catch (error: any) {
       res.status(500).json({ error: "Failed to write letter" });
@@ -214,7 +218,7 @@ async function startServer() {
 
   // Tool 6: Exam Mode
   app.post("/api/generate-exam", async (req, res) => {
-    const { topic, mcqCount, shortCount, longCount, gradeLevel, language } = req.body;
+    const { topic, mcqCount, shortCount, longCount, gradeLevel, language, userKey } = req.body;
     try {
       const prompt = `Generate a complete school assessment exam paper about "${topic}" customized for ${gradeLevel || "High School"} difficulty level.
       Target Language: ${language || "English"}
@@ -227,7 +231,7 @@ async function startServer() {
       
       Structure the output exactly as a JSON with these three keys.`;
       
-      const result = await getGroqCompletion(prompt);
+      const result = await getGroqCompletion(prompt, undefined, userKey);
       res.json(JSON.parse(result || '{"mcqs":[], "shortQuestions":[], "longQuestions":[]}'));
     } catch (error: any) {
       console.error("Exam Error:", error);
@@ -237,7 +241,7 @@ async function startServer() {
 
   // Tool 7.5: Generate scientifically-accurate educational SVG diagram using Groq Llama API instead of Gemini
   app.post("/api/generate-diagram", async (req, res) => {
-    const { topic } = req.body;
+    const { topic, userKey } = req.body;
     if (!topic) {
       return res.status(400).json({ error: "Topic/diagram description is required." });
     }
@@ -255,7 +259,7 @@ async function startServer() {
       5. Make sure the labels and annotations are spelled correctly.
       6. All SVG tags must be perfectly matching and well-formed XML to prevent parsing issues in browser and PDF conversions.`;
 
-      const rawSvg = await getGroqRawCompletion(promptText, "You are an expert academic illustrator specializing in drawing perfect SVG/XML diagrams. Output strictly the raw SVG string starting with <svg> and ending with </svg> and nothing else. No explanation, no backticks, no markdown.");
+      const rawSvg = await getGroqRawCompletion(promptText, "You are an expert academic illustrator specializing in drawing perfect SVG/XML diagrams. Output strictly the raw SVG string starting with <svg> and ending with </svg> and nothing else. No explanation, no backticks, no markdown.", userKey);
       let cleanedSvg = rawSvg.trim();
       cleanedSvg = cleanedSvg.replace(/```xml\s*/gi, "").replace(/```svg\s*/gi, "").replace(/```html\s*/gi, "").replace(/```\s*/gi, "").trim();
 
@@ -461,6 +465,180 @@ You MUST format your output as a clean, parseable JSON object.`;
     } catch (error: any) {
       console.error("Visual Analysis Error:", error);
       res.status(500).json({ error: error.message || "Failed to process visual content" });
+    }
+  });
+
+  // Tool 8: Advanced 10-in-1 Educational Smart Suite Route
+  app.post("/api/smart-tool", async (req, res) => {
+    const { toolId, topic, gradeLevel, language, userKey } = req.body;
+    if (!toolId || !topic) {
+      return res.status(400).json({ error: "Missing required toolId or topic parameters." });
+    }
+
+    const finalLevel = gradeLevel || "High School";
+    const finalLanguage = language || "English";
+
+    try {
+      let prompt = "";
+      if (toolId === "flashcard") {
+        prompt = `Generate exactly 8 educational study flashcards for a student at the ${finalLevel} grade level about "${topic}" in ${finalLanguage}.
+        Return a JSON object with a "deck" key containing an array of objects.
+        Each flashcard object in the array MUST contain:
+        - "front" (string representation of the question or vocabulary term)
+        - "back" (string representation of the corresponding explanation or definition)
+        Ensure all values are written entirely in the requested target language: ${finalLanguage}.`;
+      } else if (toolId === "mindmap") {
+        prompt = `Create a detailed, beautiful hierarchical educational mind-map outline about "${topic}" for a ${finalLevel} student in ${finalLanguage}.
+        Return a JSON object structured exactly in a nested format:
+        {
+          "name": "${topic}",
+          "children": [
+            {
+              "name": "Major Branch Title 1",
+              "children": [
+                { "name": "Key Concept Node 1.1" },
+                { "name": "Key Concept Node 1.2" }
+              ]
+            }
+          ]
+        }
+        Provide exactly 3-4 major branches, each with 2-3 specific child concept nodes.
+        Make sure all values and terminology are generated completely in ${finalLanguage}.`;
+      } else if (toolId === "planner") {
+        prompt = `Create a comprehensive, custom 7-day study plan / learning syllabus architect for mastering "${topic}" tailored for a ${finalLevel} student in ${finalLanguage}.
+        Return a JSON object with a "schedule" key containing an array of 7 day objects.
+        Each day object MUST contain:
+        - "day" (integer 1-7)
+        - "title" (string, daily module focus topic)
+        - "milestones" (array of exactly 3 granular learning checklist items)
+        - "estimatedHours" (number or decimal of daily recommended study duration)
+        Ensure everything is written written 100% in: ${finalLanguage}.`;
+      } else if (toolId === "debate") {
+        prompt = `Compile a strong, balanced, dual-sided academic debate outline and argument coach for the controversial topic: "${topic}" designed for a ${finalLevel} student in ${finalLanguage}.
+        Return a JSON object containing:
+        - "thesis" (string summarizing the core resolution or dilemma)
+        - "affirmativeArguments" (array of exactly 3 strong arguments in favor of the thesis)
+        - "negativeArguments" (array of exactly 3 strong arguments opposing the thesis)
+        - "rebuttals" (array of 3 smart guidelines on how to tackle opposing arguments)
+        Write everything entirely in ${finalLanguage}.`;
+      } else if (toolId === "case-study") {
+        prompt = `Draft an immersive, realistic real-world educational case study or scenario analyzing the application of: "${topic}" suited for a ${finalLevel} student in ${finalLanguage}.
+        Return a JSON object containing:
+        - "caseTitle" (string, catchy and contextual title)
+        - "background" (string, narrative detailing the characters, challenge or organization)
+        - "dilemma" (string, the core question, technical choice or moral decision)
+        - "analysisQuestions" (array of exactly 3 thought-provoking comprehension questions with their corresponding answers)
+        Write the narrative and analysis entirely in ${finalLanguage}.`;
+      } else if (toolId === "code-explain") {
+        prompt = `Provide a comprehensive code explanation, mental model visualization, or computational logic breakdown of: "${topic}" designed for a ${finalLevel} student in ${finalLanguage}.
+        Return a JSON object containing:
+        - "synopsis" (string explaining what the concept/code does)
+        - "pseudocode" (string representing a flawless line-by-line step-by-step logic breakdown)
+        - "dryRun" (array of exactly 3 simple state tracing comments)
+        - "pitfalls" (array of exactly 2 common logical bugs, errors, or misunderstandings to avoid)
+        Write all explanations and notes completely in ${finalLanguage}.`;
+      } else if (toolId === "research") {
+        prompt = `Formulate a rigorous, structures educational scientific research outline and thesis proposal on: "${topic}" aimed at the ${finalLevel} grade level in ${finalLanguage}.
+        Return a JSON object with:
+        - "abstract" (string summarizing the research goal and questions)
+        - "researchScope" (string definition of the experimental bounds or limits)
+        - "chapters" (array of exactly 4 chapter objects, each with chapterNum (integer), chapterTitle (string), and subsections (array of strings))
+        Ensure all academic headings and content are in ${finalLanguage}.`;
+      } else if (toolId === "mnemonics") {
+        prompt = `Generate exactly 3 extremely creative, funny mnemonic acronyms, witty sentences, or memory palace architectures to memorize ideas related to: "${topic}" suited for ${finalLevel} in ${finalLanguage}.
+        Return a JSON object with a "mnemonics" key containing an array of 3 objects.
+        Each mnemonic object MUST have:
+        - "acronym" (string, short key word or combination)
+        - "phrase" (string, the funny text expansion mapping to the terms)
+        - "visualpalace" (string, description of a vivid mental room or scenery to lock the concept)
+        Translate all memories and mnemonics into: ${finalLanguage}.`;
+      } else if (toolId === "eli5") {
+        prompt = `Deconstruct "${topic}" using a humorous and creative analogy suitable for a five-year-old child ("Explain Like I'm 5"), alongside an academic transition translated for a ${finalLevel} student in ${finalLanguage}.
+        Return a JSON object containing:
+        - "metaphorTitle" (string, funny analogy name)
+        - "eli5Metaphor" (string, the actual childish simple explanation)
+        - "academicTranslation" (string, how it maps to high-grade technical concepts)
+        - "interactiveAnalogyMatch" (string, a quick question or mental check for the student)
+        Write the metaphor and translations in ${finalLanguage}.`;
+      } else if (toolId === "jargon") {
+        prompt = `Extract exactly 6 advanced vocabulary terms, academic headers, or obscure domain-specific jargon associated with: "${topic}" designed for a ${finalLevel} student learning in ${finalLanguage}.
+        Return a JSON object with a "words" key containing an array of 6 objects.
+        Each object MUST have:
+        - "word" (string)
+        - "definition" (string, short simplified meaning)
+        - "contextSentence" (string showing proper contextual academic usage)
+        Generate all vocabularies and translations in ${finalLanguage}.`;
+      } else if (toolId === "summarizer") {
+        prompt = `Generate a detailed textbook chapter-style summary and revision parameters on "${topic}" designed for ${finalLevel} level in ${finalLanguage}.
+        Return a JSON object with:
+        - "overview" (string, brief 2-3 sentence overview)
+        - "chapters" (an array of exactly 3 objects, each with "chapterTitle" (string) and "bulletPoints" (array of exactly 3 strings showing revision highlights))
+        Translate everything completely into ${finalLanguage}.`;
+      } else if (toolId === "essay-grader") {
+        prompt = `Analyze a simulated academic paper snippet about "${topic}" at the ${finalLevel} level in ${finalLanguage}.
+        Return a JSON object containing:
+        - "estimatedGrade" (string representing grade A, B, C, D, or F)
+        - "feedbackScore" (integer 0-100 indicating visual-technical quality)
+        - "issues" (an array of exactly 3 objects, each with "originalText" (string), "errorType" (string), "correction" (string), and "explanation" (string))
+        - "overallFeedback" (string offering supportive holistic essay advice)
+        Write everything completely in ${finalLanguage}.`;
+      } else if (toolId === "lab-report") {
+        prompt = `Architect a structures, comprehensive lab experiment sheet regarding "${topic}" at ${finalLevel} grade level in ${finalLanguage}.
+        Return a JSON object containing:
+        - "experimentTitle" (string)
+        - "hypothesis" (string)
+        - "materials" (array of exactly 5 experiment equipment/substance items)
+        - "safetyRules" (array of exactly 3 safety precautions)
+        - "procedure" (array of exactly 4 step-by-step experiment instructions)
+        Generate all details in ${finalLanguage}.`;
+      } else if (toolId === "formula-sheet") {
+        prompt = `Compile a high-yield formula cheat sheet and LaTeX equation guide representing "${topic}" suited for ${finalLevel} mathematics/science levels in ${finalLanguage}.
+        Return a JSON object containing:
+        - "formulas" (an array of exactly 4 formula objects, each with "name" (string), "latexEquation" (string LaTeX math syntax like "E=mc^2"), "variableDeconstruction" (string deconstructing variables), and "practicalExample" (string example calculation representation))
+        Explain formula values in ${finalLanguage}.`;
+      } else if (toolId === "paper-questions") {
+        prompt = `Extract deep literature assessment questions based on the scholarly topic/abstract of "${topic}" at ${finalLevel} level in ${finalLanguage}.
+        Return a JSON object containing:
+        - "questions" (an array of exactly 3 questions, each with "questionText" (string), "cognitiveDomain" (string represent Bloom's Level like Analysis/Evaluation), and "modelResponseKey" (string detailed multi-sentence model grading answer guide))
+        Formulate evaluation keys in ${finalLanguage}.`;
+      } else if (toolId === "socratic") {
+        prompt = `Formulate an interactive conversational Socratic dialogue series that guides a ${finalLevel} student to understand "${topic}" intuitively in ${finalLanguage}.
+        Return a JSON object containing:
+        - "conversation" (an array of exactly 3 milestones, each with "step" (integer), "questionPrompt" (string leading Socratic prompt), "studentConceptTarget" (string conceptual target of this step), and "helperClue" (string supportive hint to guide response))
+        Write Socratic clues in ${finalLanguage}.`;
+      } else if (toolId === "curriculum-map") {
+        prompt = `Break down the educational curriculum topic "${topic}" into milestone guidelines for a ${finalLevel} program in ${finalLanguage}.
+        Return a JSON object containing:
+        - "map" (an array of exactly 3 targets, each with "unitTitle" (string name of scholastic module), "coreStandardName" (string standard outline identifier), "targetObjective" (string learning target), and "assessmentTask" (string sample classroom test/quiz verification))
+        Generate outlines entirely in ${finalLanguage}.`;
+      } else if (toolId === "interview-prep") {
+        prompt = `Synthesize challenging admission oral prepper questions on "${topic}" at ${finalLevel} level in ${finalLanguage}.
+        Return a JSON object containing:
+        - "interviewList" (an array of exactly 3 objects, each with "questionText" (string), "coreRubricFactor" (string what interviewer is grading), "modelAnswer" (string ideal high-grade reply), and "criticalTrap" (string common mistake or trap and how to avoid it))
+        Explain interview tips in ${finalLanguage}.`;
+      } else if (toolId === "citation") {
+        prompt = `Synthesize beautiful scholarly citation and bibliography examples representing standard documents on "${topic}" in ${finalLanguage}.
+        Return a JSON object containing:
+        - "citations" (an array of exactly 4 referencing objects, each with "style" (string like APA, MLA, Chicago, IEEE), "bibliographyEntry" (string formatted citation string), and "inTextCitation" (string parenthetical context citation string))
+        Write references completely in ${finalLanguage}.`;
+      } else if (toolId === "hypothesis") {
+        prompt = `Formulate a comprehensive scientific hypothesis testing plan regarding "${topic}" at the ${finalLevel} learning stage in ${finalLanguage}.
+        Return a JSON object with:
+        - "scienceStatement" (string proposed testable concept)
+        - "independentVariable" (string)
+        - "dependentVariable" (string)
+        - "controlVariables" (array of exactly 3 variables)
+        - "predictedOutcome" (string academic reasoning)
+        Write hypothesis parameters completely in ${finalLanguage}.`;
+      } else {
+        return res.status(400).json({ error: `Unsupported smart suite tool index: ${toolId}` });
+      }
+
+      const result = await getGroqCompletion(prompt, "You are a master academic trainer and learning tools architect. You must return ONLY clean valid parseable JSON. Do not write markdown or backticks.", userKey);
+      res.json(JSON.parse(result || "{}"));
+    } catch (error: any) {
+      console.error(`Smart Suite Tool [${toolId}] Error:`, error);
+      res.status(500).json({ error: `Failed to compile smart educational outputs for ${toolId}` });
     }
   });
 

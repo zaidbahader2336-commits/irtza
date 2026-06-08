@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import ReactMarkdown from 'react-markdown';
 import { 
@@ -14,7 +14,7 @@ import {
 import { cn } from '../../lib/utils';
 import { LongQuestion } from '../../types';
 import { generatePDF, PDFItem } from '../../lib/pdf';
-import { saveToUserHistory } from '../../lib/userData';
+import { saveToUserHistory, getOrCreateDefaultUser } from '../../lib/userData';
 
 interface Props {
   onDownload: (name: string) => void;
@@ -45,13 +45,17 @@ const LANGUAGES = [
 
 export default function LongQuestions({ onDownload }: Props) {
   const [topic, setTopic] = useState('');
-  const [count, setCount] = useState(5);
-  const [gradeLevel, setGradeLevel] = useState('High School (Grade 9-10)');
+  const [count, setCount] = useState(3);
+  const [gradeLevel, setGradeLevel] = useState('Undergraduate / College');
   const [language, setLanguage] = useState('English');
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<QuestionWithMeta[]>([]);
   const [expanded, setExpanded] = useState<number[]>([]);
   const [highlighted, setHighlighted] = useState<number[]>([]);
+
+  useEffect(() => {
+    // Start fresh - require user input
+  }, []);
 
   const generateQuestions = async () => {
     if (!topic.trim()) return;
