@@ -963,6 +963,25 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
     });
   }
 
+  // 6. VECTOR DIAGRAMS (SOLVED VERSION ONLY)
+  if (blocks.length > 0 && isSolved) {
+    content.forEach((item) => {
+      if (item.type === 'image' && item.text) {
+        blocks.push({
+          html: `
+            <div style="margin-top: 15px; margin-bottom: 15px; border: 1.5px solid #DFBA6B; border-radius: 12px; padding: 12px; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; page-break-inside: avoid; max-height: 480px; overflow: hidden; font-family: 'Inter', sans-serif;">
+              <span style="font-size: 9px; font-weight: 800; color: #DFBA6B; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Dynamic Learning Model Diagram</span>
+              <div style="width: 100%; max-height: 430px; display: flex; justify-content: center; align-items: center;">
+                ${item.text}
+              </div>
+            </div>
+          `,
+          estimatedHeight: 350
+        });
+      }
+    });
+  }
+
   // --- ARBITRARY WORDPRESS FALLBACK / SMART SUITE ---
   if (blocks.length === 0) {
     let adaptiveHTML = elegantHeaderHTML + `
@@ -992,7 +1011,7 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
         if (item.text.startsWith('•') || item.text.startsWith('-')) {
           adaptiveHTML += `
             <div style="font-size: 11.5px; color: #374151; padding-left: 10px; line-height: 1.5;">
-              ${item.text}
+               ${item.text}
             </div>
           `;
         } else {
@@ -1005,6 +1024,17 @@ export const generatePDF = async (title: string, content: PDFItem[], options?: P
       } else if (item.type === 'blankLines' && item.count) {
         for (let l = 0; l < (item.count || 2); l++) {
           adaptiveHTML += `<div style="border-bottom: 1.2px dotted #B8A6A6; height: 16px; margin-bottom: 8px;"></div>`;
+        }
+      } else if (item.type === 'image' && item.text) {
+        if (isSolved) {
+          adaptiveHTML += `
+            <div style="margin-top: 18px; margin-bottom: 18px; border: 1.5px solid #DFBA6B; border-radius: 12px; padding: 14px; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center; max-height: 480px; overflow: hidden; page-break-inside: avoid;">
+              <span style="font-family: 'Inter', sans-serif; font-size: 8.5px; font-weight: 850; color: #DFBA6B; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Dynamic Learning Model Diagram</span>
+              <div style="width: 100%; display: flex; justify-content: center; align-items: center;">
+                ${item.text}
+              </div>
+            </div>
+          `;
         }
       }
     });

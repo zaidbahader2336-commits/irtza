@@ -247,19 +247,47 @@ async function startServer() {
     }
 
     try {
-      const promptText = `Create a beautiful, modern, scientifically and educationally accurate, and highly detailed visual vector SVG diagram representing the concept: "${topic}".
-      Theme color guidelines: Must use a beautiful green-and-white academic theme. Background must be transparent or very soft white (#FFFFFF) with rounded rect card borders.
-      Accent colors to use: Forest green (#064E3B), emerald/mint (#10B981, #059669), and light mint (#E6F7F0).
-      
-      SVG Guidelines:
-      1. Output ONLY valid, clean SVG tags. No markdown formatting, no backticks, no wrap, no introductory text. Just raw parseable XML/SVG string.
-      2. Ensure it has viewBox="0 0 800 500" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg".
-      3. Draw highly detailed, clearly labeled diagram parts (using <text> tags with standard sans-serif font-family like 'system-ui', 'helvetica' or 'Inter' and appropriate color labels so they contrast perfectly).
-      4. Use shapes (<circle>, <rect>, <path>, <ellipse>, <line>) and nice arrows (using marker-end markers or arrow shapes) to show mechanisms, flows, or structural components.
-      5. Make sure the labels and annotations are spelled correctly.
-      6. All SVG tags must be perfectly matching and well-formed XML to prevent parsing issues in browser and PDF conversions.`;
+      const promptText = `Generate a highly professional, beautiful, and pristine 800x500 widescreen visual vector SVG diagram illustrating "${topic}".
+      The diagram MUST EXACTLY implement a custom-styled "8 Steps Circular Infographic Diagram Template" tailored and filled with real academic steps for this topic.
 
-      const rawSvg = await getGroqRawCompletion(promptText, "You are an expert academic illustrator specializing in drawing perfect SVG/XML diagrams. Output strictly the raw SVG string starting with <svg> and ending with </svg> and nothing else. No explanation, no backticks, no markdown.", userKey);
+      Layout and Structure of the SVG:
+      1. Widescreen 16:9 canvas with viewBox="0 0 800 500" width="100%" height="100%". Use a very soft, clean light gray/blue background (#FAFBFD) with a thin margin border so it looks like a premium standalone card.
+      2. Centering coordinates: Center point of the design is exactly (400, 240).
+      3. Central Core Circle:
+         - CX=400, CY=240, Radius=80.
+         - Solid white background (#FFFFFF) with a beautiful card border (#E2E8F0) and soft subtle shadows.
+         - Inside this circle: Place the central name of the topic "${topic}". Wrap or split this text into 2-3 short centered lines using <text text-anchor="middle" font-family="'Inter', system-ui, sans-serif"> with high contrast dark bold charcoal text. Scale the size dynamically to fit within the 80px radius circle.
+         - Add a tiny, elegant sub-badge like "8 CORE PILLARS" or "PROCESS MAP" in small uppercase letters inside this circle.
+      4. Surrounded Segmented Ring:
+         - Around this central circle (radius 80 to 110), design a segmented wheel circle.
+         - The ring must show 8 colored segment sections corresponding to Steps 01 to 08.
+         - Each segment sector must contain its step number ("01", "02", "03", "04", "05", "06", "07", "08") written in bold white styled sans-serif text to create a premium, balanced, numbered ring.
+         - Color code the segments and their corresponding connected cards in these 4 paired premium schemes:
+           * Step 01 (top-right) and Step 05 (bottom-left): Warm Gold/Sienna (#D97706 or #E28C3E)
+           * Step 02 (mid-high-right) and Step 06 (low-left): Emerald Sea (#10B981 or #118C62)
+           * Step 03 (mid-low-right) and Step 07 (high-left): Sunset Orange (#E15D34)
+           * Step 04 (bottom-right) and Step 08 (top-left): Classic Crimson Red (#991B1B or #B02A2A)
+      5. Symmetrical Rounded Speech Cards on Left and Right:
+         - Display four Cards on the right side and four Cards on the left side vertically, with plenty of margins.
+         - Right-side cards (Steps 01, 02, 03, 04) - Starting at X=510. Width=230, Height=80.
+           * Step 01: Y=25. Accent: Gold.
+           * Step 02: Y=125. Accent: Emerald.
+           * Step 03: Y=225. Accent: Sunset.
+           * Step 04: Y=325. Accent: Crimson.
+         - Left-side cards (Steps 08, 07, 06, 05) - Starting at X=60. Width=230, Height=80.
+           * Step 08: Y=25. Accent: Crimson.
+           * Step 07: Y=125. Accent: Sunset.
+           * Step 06: Y=225. Accent: Emerald.
+           * Step 05: Y=325. Accent: Gold.
+         - Each card must be a beautiful rounded container (<rect> with rx="14" ry="14") having a soft off-white fill, colored outline matching its step accent color, and a small pointer indicator triangle on its inner side pointing exactly towards the center ring.
+      6. Card Contents (Real Content, NEVER generic 'Lorem Ipsum'):
+         - Fill all 8 items with real, highly-educational academic progression titles and 1-2 sentence small summaries specific to "${topic}".
+         - For example, if the topic is "Mitosis", the 8 steps should cover Interphase, Prophase, Prometaphase, Metaphase, Anaphase, Telophase, Cytokinesis, and Daughter Cells. Ensure they are highly descriptive.
+         - Draw an inline vector circle with a simple stylized academic symbol/icon (like scales, gear, chart, lightbulb, checklist, clock, puzzle piece, chemical flask) matching that step's name at the inner end of each card.
+      7. Connecting lines or smooth curved arcs should connect these cards to the main ring cleanly.
+      8. Ensure all labels, texts, and icons match exactly. The SVG must be perfect, valid XML. Output ONLY the raw XML string starting with <svg> and ending with </svg>. Do not wrap in markdown tags or add header text.`;
+
+      const rawSvg = await getGroqRawCompletion(promptText, "You are a master academic vector illustrator of high-fidelity infographic schemas. Output strictly the raw SVG string starting with <svg> and ending with </svg> and nothing else. No explanation, no backticks, no markdown wrapping.", userKey);
       let cleanedSvg = rawSvg.trim();
       cleanedSvg = cleanedSvg.replace(/```xml\s*/gi, "").replace(/```svg\s*/gi, "").replace(/```html\s*/gi, "").replace(/```\s*/gi, "").trim();
 
@@ -273,6 +301,65 @@ async function startServer() {
     } catch (error: any) {
       console.error("Groq Diagram Generation Error:", error);
       res.status(500).json({ error: "Failed to generate science diagram with Groq API." });
+    }
+  });
+
+  // Tool 7.6: Generate dynamically structured mind map/diagram requests for Google Slides
+  app.post("/api/generate-slides-requests", async (req, res) => {
+    const { topic, userKey } = req.body;
+    if (!topic) {
+      return res.status(400).json({ error: "Topic is required." });
+    }
+
+    try {
+      const prompt = `You are a professional educational illustrator and Google Slides diagram developer.
+Generate a JSON array of Google Slides API presentations batchUpdate Request objects to construct a visually stunning, highly detailed, beautifully structured mind map/flow diagram for the academic topic: "${topic}".
+
+The presentation canvas is standard widescreen: 720 points wide by 405 points high.
+Placeholders:
+You MUST use "{{SLIDE_ID}}" as the placeholder for the slide object ID. Do not hardcode a slide ID.
+
+Requirements:
+Create exactly the following elements:
+1. One central core topic box (objectId: "center_box_node") positioned at the center of the slide:
+   - Position coordinates: translateX = 260, translateY = 150, width = 200, height = 80.
+   - Text inside: "${topic}" (Bold, font size 14, Centered).
+2. Four supporting academic detail boxes (objectIds: "sub_box_1", "sub_box_2", "sub_box_3", "sub_box_4") that go around the central box. For each box, identify a key concept, subtopic, or stage relevant to "${topic}".
+   - Coordinate guide:
+     - Top-Left ("sub_box_1"): translateX = 30, translateY = 30, width = 180, height = 90.
+       Text inside: a relevant key concept title (bold) and 1-2 sentence detailed description.
+     - Top-Right ("sub_box_2"): translateX = 510, translateY = 30, width = 180, height = 90.
+       Text inside: a second relevant key concept title (bold) and 1-2 sentence detailed description.
+     - Bottom-Left ("sub_box_3"): translateX = 30, translateY = 270, width = 180, height = 90.
+       Text inside: a third relevant key concept title (bold) and 1-2 sentence detailed description.
+     - Bottom-Right ("sub_box_4"): translateX = 510, translateY = 270, width = 180, height = 90.
+       Text inside: a fourth relevant key concept title (bold) and 1-2 sentence detailed description.
+3. Four clean connecting lines (lineIds: "line_1", "line_2", "line_3", "line_4") going from the central box to each supporting box with arrows:
+   - Line 1 (from center box to sub_box_1): from center box border to sub_box_1.
+   - Line 2 (from center box to sub_box_2): from center box border to sub_box_2.
+   - Line 3 (from center box to sub_box_3): from center box border to sub_box_3.
+   - Line 4 (from center box to sub_box_4): from center box border to sub_box_4.
+
+For each of the 5 shapes (center + 4 sub-boxes), include the following exact request sequence in your array:
+- "createShape": creating a 'ROUND_RECTANGLE' with correct objectId, referencing 'pageObjectId': '{{SLIDE_ID}}', and size/transform.
+- "updateShapeProperties": set solid shape fill color (use beautiful soft academic pastels, e.g. center box: red: 0.9, green: 0.93, blue: 0.98. Supporting boxes: red: 0.93, green: 0.98, blue: 0.93 for green-themed ones or light yellow/cream) and custom outline stroke (weight=1).
+- "insertText": insert the title and descriptive details inside.
+- "updateTextStyle": format text to Georgia or Arial, deep charcoal color, text range ALL.
+
+For each of the 4 lines, include:
+- "createLine": create 'STRAIGHT' line on slide '{{SLIDE_ID}}' with correct lineId and correct size and transform properties to place it between the central box and the target sub-box.
+- "updateLineProperties": setting endArrow to 'STEALTH_ARROW' and color to charcoal.
+
+Ensure that all requests are placed in the correct order so dependencies match (e.g. createShape must run before updateShapeProperties, insertText, etc.).
+Return a JSON object with a single "requests" key containing the array of these Google Slides API Request objects. DO NOT include any markdown backticks or explanation text — only valid raw parseable JSON.`;
+
+      const result = await getGroqCompletion(prompt, undefined, userKey);
+      const parsed = JSON.parse(result || '{"requests": []}');
+      res.json(parsed);
+
+    } catch (error: any) {
+      console.error("Slides API Request Generation Error:", error);
+      res.status(500).json({ error: error.message || "An error occurred with the Google Slides generation." });
     }
   });
 
@@ -630,6 +717,16 @@ You MUST format your output as a clean, parseable JSON object.`;
         - "controlVariables" (array of exactly 3 variables)
         - "predictedOutcome" (string academic reasoning)
         Write hypothesis parameters completely in ${finalLanguage}.`;
+      } else if (toolId === "difference") {
+        prompt = `You are an expert academic comparative researcher. For the topics/concepts requested in "${topic}", formulate a clean structured comparison for a student at the ${finalLevel} level in ${finalLanguage}.
+        Return a JSON object containing:
+        - "comparisonTitle" (string, e.g. "React vs. Vue: Structural Comparative Guide")
+        - "introduction" (string, formal overview of both concepts in ${finalLanguage})
+        - "columns" (array of exactly 3 header strings, e.g. ["Comparison Feature", "Concept A", "Concept B"])
+        - "rows" (array of exactly 5 objects representing comparison criteria. Each object MUST contain "feature" (string), "conceptA" (string), and "conceptB" (string))
+        - "detailedAnalyses" (array of exactly 3 bullet points discussing secondary parameters or similarities in ${finalLanguage})
+        - "conclusion" (string wrapping up when to choose which concept in ${finalLanguage})
+        Generate all explanations and texts in ${finalLanguage}.`;
       } else {
         return res.status(400).json({ error: `Unsupported smart suite tool index: ${toolId}` });
       }

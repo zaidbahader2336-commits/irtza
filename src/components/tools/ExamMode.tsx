@@ -20,6 +20,7 @@ import { cn } from '../../lib/utils';
 import { ExamPaper, MCQ, ShortQuestion, LongQuestion } from '../../types';
 import { generatePDF, PDFItem } from '../../lib/pdf';
 import { saveToUserHistory, getOrCreateDefaultUser } from '../../lib/userData';
+import SpeechButton from '../SpeechButton';
 
 type ExamStatus = 'setup' | 'active' | 'results';
 
@@ -402,6 +403,7 @@ export default function ExamMode({ onDownload }: ExamModeProps) {
                     <div className="flex items-start gap-3">
                        <span className="text-[10px] font-black text-[#6366F1] mt-1">Q{idx+1}</span>
                        <h3 className="text-sm font-bold text-[#0F172A] leading-normal flex-1">{q.question}</h3>
+                       <SpeechButton text={q.question} className="scale-75 shrink-0" />
                        <button 
                          type="button"
                          onClick={() => toggleFlag(`mcq_${idx}`)}
@@ -412,23 +414,24 @@ export default function ExamMode({ onDownload }: ExamModeProps) {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pl-4">
                       {q.options.map((opt, oi) => (
-                        <button
+                        <div
                           key={oi}
-                          type="button"
+                          role="button"
                           onClick={() => setUserAnswers(prev => ({ ...prev, [`mcq_${idx}`]: oi }))}
-                          className={cn(
-                            "p-3.5 rounded-lg text-left border transition-all text-xs font-semibold flex items-center gap-3 cursor-pointer",
-                            userAnswers[`mcq_${idx}`] === oi 
-                              ? "bg-indigo-50/50 border-[#6366F1] text-indigo-900 shadow-xs" 
-                              : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-gray-50 hover:text-gray-800"
-                          )}
+                           className={cn(
+                             "p-3.5 rounded-lg text-left border transition-all text-xs font-semibold flex items-center gap-3 cursor-pointer",
+                             userAnswers[`mcq_${idx}`] === oi 
+                               ? "bg-indigo-50/50 border-[#6366F1] text-indigo-900 shadow-xs" 
+                               : "bg-white border-[#E2E8F0] text-[#64748B] hover:bg-gray-50 hover:text-gray-800"
+                           )}
                         >
                           <span className={cn(
                             "w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-black",
                             userAnswers[`mcq_${idx}`] === oi ? "bg-[#6366F1] text-white" : "bg-gray-100 text-gray-400"
                           )}>{String.fromCharCode(65 + oi)}</span>
                           <span className="flex-1 text-gray-800">{opt}</span>
-                        </button>
+                          <SpeechButton text={opt} className="scale-[0.65] shrink-0 bg-white" />
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -447,6 +450,7 @@ export default function ExamMode({ onDownload }: ExamModeProps) {
                     <div className="flex items-start gap-3">
                        <span className="text-[10px] font-black text-[#6366F1] mt-1">Q{idx+1}</span>
                        <h3 className="text-sm font-bold text-[#0F172A] leading-normal flex-1">{q.question}</h3>
+                       <SpeechButton text={q.question} className="scale-75 shrink-0" />
                        <button onClick={() => toggleFlag(`short_${idx}`)} className={cn("p-1.5 rounded-md transition-colors", flagged.includes(`short_${idx}`) ? "bg-amber-100 text-amber-600" : "text-[#94A3B8] hover:text-[#64748B]")}><Flag size={14} /></button>
                     </div>
                     <textarea 
@@ -471,6 +475,7 @@ export default function ExamMode({ onDownload }: ExamModeProps) {
                     <div className="flex items-start gap-3">
                        <span className="text-[10px] font-black text-[#6366F1] mt-1">Q{idx+1}</span>
                        <h3 className="text-sm font-bold text-[#0F172A] leading-normal flex-1">{q.question}</h3>
+                       <SpeechButton text={q.question} className="scale-75 shrink-0" />
                        <button onClick={() => toggleFlag(`long_${idx}`)} className={cn("p-1.5 rounded-md transition-colors", flagged.includes(`long_${idx}`) ? "bg-amber-100 text-amber-600" : "text-[#94A3B8] hover:text-[#64748B]")}><Flag size={14} /></button>
                     </div>
                     <textarea 
@@ -591,16 +596,20 @@ export default function ExamMode({ onDownload }: ExamModeProps) {
                  const isCorrect = userAnswers[`mcq_${idx}`] === q.correctIndex;
                  return (
                    <div key={idx} className={cn("p-6 rounded-xl border bg-white shadow-xs space-y-4", isCorrect ? "border-green-100" : "border-rose-100")}>
-                      <div className="flex items-start justify-between">
+                      <div className="flex items-start justify-between gap-2">
                          <h3 className="text-xs font-bold text-[#0F172A] leading-relaxed flex-1 pr-4">{q.question}</h3>
-                         {isCorrect ? <CheckCircle2 size={16} className="text-green-500 shrink-0 mt-0.5" /> : <XCircle size={16} className="text-rose-500 shrink-0 mt-0.5" />}
+                         <div className="flex items-center gap-1.5 shrink-0">
+                           <SpeechButton text={q.question} className="scale-75" />
+                           {isCorrect ? <CheckCircle2 size={16} className="text-green-500" /> : <XCircle size={16} className="text-rose-500" />}
+                         </div>
                       </div>
-                      <div className="text-xs space-y-1">
+                      <div className="text-xs space-y-1 text-left">
                          <div className="font-semibold text-gray-500">Your Answer: <span className={cn(isCorrect ? "text-green-600" : "text-rose-600")}>{q.options[userAnswers[`mcq_${idx}`]] || 'Not Answered'}</span></div>
                          {!isCorrect && <div className="font-extrabold text-green-600">Correct Choice: {q.options[q.correctIndex]}</div>}
                       </div>
-                      <div className="p-3 bg-gray-50/70 border border-[#E2E8F0] rounded-lg text-[11px] text-[#64748B] italic leading-relaxed font-sans">
-                         {q.explanation}
+                      <div className="p-3 bg-gray-50/70 border border-[#E2E8F0] rounded-lg text-[11px] text-[#64748B] italic leading-relaxed font-sans flex items-start justify-between gap-2 text-left">
+                         <span className="flex-1">{q.explanation}</span>
+                         <SpeechButton text={q.explanation} className="scale-75 shrink-0 bg-white" />
                       </div>
                    </div>
                  );
@@ -617,10 +626,13 @@ export default function ExamMode({ onDownload }: ExamModeProps) {
             
             <div className="space-y-4">
                {exam.shortQuestions.map((q, idx) => (
-                 <div key={idx} className="bg-white rounded-xl border border-[#E2E8F0] shadow-sm overflow-hidden">
+                 <div key={idx} className="bg-white rounded-xl border border-[#E2E8F0] shadow-sm overflow-hidden text-left">
                     <div className="p-4 bg-[#F8FAFF] border-b border-[#E2E8F0] flex items-center justify-between px-6">
-                       <h3 className="text-xs font-black text-[#0F172A]">Short Q{idx+1}: {q.question}</h3>
-                       <div className="px-2.5 py-0.5 bg-blue-50 text-[#3B82F6] rounded-md text-[9px] font-black uppercase tracking-wider border border-blue-100">Section B</div>
+                       <div className="flex items-center gap-1.5 flex-1 pr-4">
+                          <h3 className="text-xs font-black text-[#0F172A]">Short Q{idx+1}: {q.question}</h3>
+                          <SpeechButton text={q.question} className="scale-75 shrink-0 bg-white text-slate-400" />
+                       </div>
+                       <div className="px-2.5 py-0.5 bg-blue-50 text-[#3B82F6] rounded-md text-[9px] font-black uppercase tracking-wider border border-blue-100 shrink-0">Section B</div>
                     </div>
                     <div className="grid grid-cols-1 lg:grid-cols-2">
                        <div className="p-6 border-r border-[#E2E8F0] bg-white text-xs">
@@ -630,7 +642,10 @@ export default function ExamMode({ onDownload }: ExamModeProps) {
                           </p>
                        </div>
                        <div className="p-6 bg-[#F8FAFF] text-xs">
-                          <label className="text-[9px] font-black uppercase text-blue-500 tracking-wider block mb-2">AI Expert Guidelines</label>
+                          <div className="flex items-center justify-between mb-2 gap-4">
+                             <label className="text-[9px] font-black uppercase text-blue-500 tracking-wider block">AI Expert Guidelines</label>
+                             <SpeechButton text={q.modelAnswer} className="scale-75 shrink-0 bg-white" />
+                          </div>
                           <p className="text-gray-900 leading-relaxed font-semibold">
                              {q.modelAnswer}
                           </p>
@@ -642,10 +657,13 @@ export default function ExamMode({ onDownload }: ExamModeProps) {
 
             <div className="space-y-4 mt-6">
                {exam.longQuestions.map((q, idx) => (
-                 <div key={idx} className="bg-white rounded-xl border border-[#E2E8F0] shadow-sm overflow-hidden">
+                 <div key={idx} className="bg-white rounded-xl border border-[#E2E8F0] shadow-sm overflow-hidden text-left">
                     <div className="p-4 bg-[#F8FAFF] border-b border-[#E2E8F0] flex items-center justify-between px-6">
-                       <h3 className="text-xs font-black text-[#0F172A]">Long Essay Q{idx+1}: {q.question}</h3>
-                       <div className="px-2.5 py-0.5 bg-indigo-50 text-indigo-600 rounded-md text-[9px] font-black uppercase tracking-wider border border-indigo-100">Section C</div>
+                       <div className="flex items-center gap-1.5 flex-1 pr-4">
+                          <h3 className="text-xs font-black text-[#0F172A]">Long Essay Q{idx+1}: {q.question}</h3>
+                          <SpeechButton text={q.question} className="scale-75 shrink-0 bg-white text-slate-400" />
+                       </div>
+                       <div className="px-2.5 py-0.5 bg-indigo-50 text-indigo-600 rounded-md text-[9px] font-black uppercase tracking-wider border border-indigo-100 shrink-0">Section C</div>
                     </div>
                     <div className="grid grid-cols-1 xl:grid-cols-2">
                        <div className="p-6 border-r border-[#E2E8F0] bg-white text-xs max-h-[300px] overflow-y-auto custom-scrollbar">
@@ -655,16 +673,19 @@ export default function ExamMode({ onDownload }: ExamModeProps) {
                           </p>
                        </div>
                        <div className="p-6 bg-[#F8FAFF] text-xs max-h-[300px] overflow-y-auto custom-scrollbar">
-                          <label className="text-[9px] font-black uppercase text-indigo-500 tracking-wider block mb-2">Expert Anchor Reference</label>
+                          <div className="flex items-center justify-between mb-2 gap-4">
+                             <label className="text-[9px] font-black uppercase text-indigo-500 tracking-wider block">Expert Anchor Reference</label>
+                             <SpeechButton text={q.modelAnswer} className="scale-75 shrink-0 bg-white" />
+                          </div>
                           <p className="text-gray-950 leading-relaxed font-semibold whitespace-pre-wrap">
                              {q.modelAnswer}
                           </p>
                        </div>
                     </div>
-                 </div>
-               ))}
-            </div>
-         </div>
+                  </div>
+                ))}
+             </div>
+          </div>
       </div>
     );
   }

@@ -19,6 +19,8 @@ import { cn } from '../../lib/utils';
 import { TopicExplanation } from '../../types';
 import { generatePDF, PDFItem } from '../../lib/pdf';
 import { saveToUserHistory, getOrCreateDefaultUser } from '../../lib/userData';
+import SpeechButton from '../SpeechButton';
+import GoogleSlidesDiagramViewer from './GoogleSlidesDiagramViewer';
 
 const convertUrlToBase64 = (url: string): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -438,12 +440,18 @@ export default function TopicExplainer({ onDownload }: Props) {
           </div>
 
           <div className="p-6 space-y-6">
-            {/* Title & Exec Summary */}
+             {/* Title & Exec Summary */}
             <div className="space-y-2.5">
-              <h1 className="text-xl font-black text-[#047857] leading-tight tracking-tight">{explanation.title}</h1>
-              <p className="text-xs font-semibold text-slate-600 leading-relaxed text-justify bg-[#FAFCFB] p-4.5 border border-emerald-100 rounded-xl shadow-4xs">
-                {explanation.summary}
-              </p>
+              <div className="flex items-center justify-between gap-4">
+                <h1 className="text-xl font-black text-[#047857] leading-tight tracking-tight">{explanation.title}</h1>
+                <SpeechButton text={explanation.title} />
+              </div>
+              <div className="flex items-start justify-between gap-4 bg-[#FAFCFB] p-4.5 border border-emerald-100 rounded-xl shadow-4xs">
+                <p className="text-xs font-semibold text-slate-600 leading-relaxed text-justify flex-1">
+                  {explanation.summary}
+                </p>
+                <SpeechButton text={explanation.summary} className="scale-90 shrink-0" />
+              </div>
             </div>
 
             {/* Foundations */}
@@ -459,10 +467,13 @@ export default function TopicExplainer({ onDownload }: Props) {
                 {explanation.keyConcepts.map((c, i) => (
                   <div 
                     key={i} 
-                    className="p-3.5 rounded-xl bg-white border border-emerald-100 flex items-start gap-2.5 shadow-3xs hover:border-emerald-300 transition-all text-left"
+                    className="p-3.5 rounded-xl bg-white border border-emerald-100 flex items-center justify-between gap-2.5 shadow-3xs hover:border-emerald-300 transition-all text-left"
                   >
-                    <ArrowRightCircle size={15} className="text-emerald-555 mt-0.5 shrink-0" />
-                    <span className="text-xs font-bold text-gray-800 leading-snug">{c}</span>
+                    <div className="flex items-start gap-2 flex-1">
+                      <ArrowRightCircle size={15} className="text-[#047857] mt-0.5 shrink-0" />
+                      <span className="text-xs font-bold text-gray-800 leading-snug">{c}</span>
+                    </div>
+                    <SpeechButton text={c} className="scale-75 shrink-0" />
                   </div>
                 ))}
               </div>
@@ -477,22 +488,26 @@ export default function TopicExplainer({ onDownload }: Props) {
                 </div>
                 <h3 className="font-extrabold uppercase tracking-wider text-[10px] text-[#64748B]">Real World Metaphor</h3>
               </div>
-              <div className="p-5 rounded-xl bg-emerald-50/10 border border-emerald-100/60 pl-6 relative text-left">
+              <div className="p-5 rounded-xl bg-emerald-50/10 border border-emerald-100/60 pl-6 relative text-left flex items-start justify-between gap-4">
                 <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500 opacity-50" />
-                <p className="text-emerald-950 text-xs font-semibold leading-relaxed">
+                <p className="text-emerald-950 text-xs font-semibold leading-relaxed flex-1">
                     {explanation.analogy}
                 </p>
+                <SpeechButton text={explanation.analogy} className="scale-90 shrink-0" />
               </div>
             </div>
 
             {/* Detailed Explanation */}
             {explanation.detailedExplanation && (
               <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
-                    <FileText size={14} />
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 shadow-sm">
+                      <FileText size={14} />
+                    </div>
+                    <h3 className="font-extrabold uppercase tracking-wider text-[10px] text-[#64748B]">Classroom Breakdown Detail</h3>
                   </div>
-                  <h3 className="font-extrabold uppercase tracking-wider text-[10px] text-[#64748B]">Classroom Breakdown Detail</h3>
+                  <SpeechButton text={explanation.detailedExplanation} />
                 </div>
                 <div className="p-5 rounded-xl bg-white border border-[#E2E8F0] shadow-sm text-xs leading-relaxed text-gray-700 text-justify">
                   <div className="markdown-body">
@@ -512,9 +527,12 @@ export default function TopicExplainer({ onDownload }: Props) {
               </div>
               <div className="flex flex-col gap-2">
                 {explanation.misconceptions.map((m, i) => (
-                  <div key={i} className="flex items-center gap-2.5 text-xs font-bold text-rose-800 bg-rose-50/40 px-4 py-2.5 rounded-lg border border-rose-100">
-                    <span className="w-1.5 h-1.5 rounded-full bg-rose-450 shrink-0" />
-                    <span className="leading-snug">{m}</span>
+                  <div key={i} className="flex items-center justify-between gap-2.5 text-xs font-bold text-rose-800 bg-rose-50/40 px-4 py-2.5 rounded-lg border border-rose-100">
+                    <div className="flex items-center gap-2 flex-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-450 shrink-0" />
+                      <span className="leading-snug">{m}</span>
+                    </div>
+                    <SpeechButton text={m} className="scale-75 shrink-0 shadow-sm" />
                   </div>
                 ))}
               </div>
@@ -635,53 +653,13 @@ export default function TopicExplainer({ onDownload }: Props) {
                 <div className="space-y-4">
                   <div className="text-xs font-bold text-emerald-700 bg-[#E6F7F0] border border-emerald-100 p-3.5 rounded-lg flex items-center gap-1.5 animate-in fade-in">
                     <Sparkles size={14} className="shrink-0 text-emerald-500" />
-                    <span>The academic blueprint is loaded and will be exported as Landscape Slide 5 inside your PDF!</span>
+                    <span>The academic whiteboard workspace is active. Customize or present using Google Slides widgets below!</span>
                   </div>
                   
-                  <div className="bg-white border-2 border-emerald-100 rounded-xl p-6 shadow-sm flex flex-col items-center">
-                    {/* Inline preview of generated XML/SVG code */}
-                    <div 
-                      className="w-full flex items-center justify-center p-2 rounded-lg bg-emerald-50/10 border border-emerald-100 max-h-[380px] overflow-hidden shadow-inner flex shrink-0"
-                      dangerouslySetInnerHTML={{ __html: generatedDiagramSvg }}
-                    />
-                    
-                    <div className="mt-4 flex flex-wrap items-center justify-between w-full border-t border-gray-100 pt-4 gap-3">
-                      <div>
-                        <p className="text-xs font-extrabold text-emerald-950">Whiteboard Diagram: {pexelsQuery || topic}</p>
-                        <p className="text-[10px] text-emerald-400 font-bold font-sans">Scaled vectors produced by Gemini</p>
-                      </div>
-
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const blob = new Blob([generatedDiagramSvg], { type: 'image/svg+xml' });
-                            const url = URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = `edugen_${(pexelsQuery || 'concept').toLowerCase().replace(/\s+/g, '_')}.svg`;
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                            URL.revokeObjectURL(url);
-                          }}
-                          className="px-3.5 py-1.5 rounded-lg text-xs font-black bg-emerald-50 border border-emerald-200 text-emerald-700 hover:bg-emerald-100 cursor-pointer"
-                        >
-                          Save SVG File
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(generatedDiagramSvg);
-                            alert("Copied SVG XML code to clipboard successfully!");
-                          }}
-                          className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#FAFCFB] border border-slate-200 text-slate-700 hover:bg-slate-50 cursor-pointer"
-                        >
-                          Copy SVG Markup
-                        </button>
-                      </div>
-                    </div>
-                  </div>
+                  <GoogleSlidesDiagramViewer 
+                    topic={pexelsQuery || topic} 
+                    defaultSvg={generatedDiagramSvg} 
+                  />
                 </div>
               )}
             </div>

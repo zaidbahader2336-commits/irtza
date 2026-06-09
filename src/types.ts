@@ -65,4 +65,4 @@ export interface User {
   data: UserData;
 }
 
-export type ToolType = 'home' | 'mcq' | 'short' | 'long' | 'explainer' | 'story-letter' | 'exam' | 'history' | 'visual' | 'share' | 'flashcard' | 'mindmap' | 'planner' | 'debate' | 'case-study' | 'code-explain' | 'research' | 'mnemonics' | 'eli5' | 'jargon' | 'summarizer' | 'essay-grader' | 'lab-report' | 'formula-sheet' | 'paper-questions' | 'socratic' | 'curriculum-map' | 'interview-prep' | 'citation' | 'hypothesis';
+export type ToolType = 'home' | 'mcq' | 'short' | 'long' | 'explainer' | 'story-letter' | 'exam' | 'history' | 'visual' | 'share' | 'flashcard' | 'mindmap' | 'planner' | 'debate' | 'case-study' | 'code-explain' | 'research' | 'mnemonics' | 'eli5' | 'jargon' | 'summarizer' | 'essay-grader' | 'lab-report' | 'formula-sheet' | 'paper-questions' | 'socratic' | 'curriculum-map' | 'interview-prep' | 'citation' | 'hypothesis' | 'difference';

@@ -16,6 +16,7 @@ import { cn } from '../../lib/utils';
 import { MCQ } from '../../types';
 import { generatePDF, PDFItem } from '../../lib/pdf';
 import { saveToUserHistory, getOrCreateDefaultUser } from '../../lib/userData';
+import SpeechButton from '../SpeechButton';
 import confetti from 'canvas-confetti';
 
 interface Props {
@@ -379,26 +380,31 @@ export default function MCQGenerator({ onDownload }: Props) {
                       onClick={() => setExpandedIndex(expandedIndex === i ? null : i)}
                       className="w-full px-5 py-3.5 flex items-center justify-between text-left text-sm font-bold text-[#0F172A] hover:bg-indigo-50/50 transition-colors"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 overflow-hidden flex-1">
                         <span className="w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center text-[10px] font-bold text-[#6366F1]">
                            {i + 1}
                         </span>
                         <span className="truncate max-w-lg">{q.question}</span>
                       </div>
-                      {expandedIndex === i ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                        <SpeechButton text={q.question} className="scale-75 bg-white text-[#94A3B8]" />
+                        {expandedIndex === i ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </div>
                     </button>
                     {expandedIndex === i && (
                       <div className="px-5 pb-5 pt-1 space-y-3 text-xs border-t border-[#E2E8F0] bg-white animate-in slide-in-from-top-1">
                         <p className="text-[#64748B] font-semibold">Options:</p>
                         <div className="grid grid-cols-2 gap-2 text-gray-700">
                           {q.options.map((opt, oi) => (
-                            <div key={oi} className={cn("p-2 border rounded-lg", oi === q.correctIndex ? "bg-green-50 border-green-200 text-green-700 font-bold" : "bg-gray-50 border-[#E2E8F0]")}>
-                               {String.fromCharCode(65 + oi)}) {opt}
+                            <div key={oi} className={cn("p-2 border rounded-lg flex items-center justify-between gap-2", oi === q.correctIndex ? "bg-green-50 border-green-200 text-green-700 font-bold" : "bg-gray-50 border-[#E2E8F0]")}>
+                               <span>{String.fromCharCode(65 + oi)}) {opt}</span>
+                               <SpeechButton text={opt} className="scale-[0.65] shrink-0 bg-white" />
                             </div>
                           ))}
                         </div>
-                        <p className="text-gray-600 bg-[#F8FAFF] p-3 rounded-lg border border-[#E2E8F0] leading-relaxed">
-                          <span className="font-bold text-indigo-600">Explanation:</span> {q.explanation}
+                        <p className="text-gray-600 bg-[#F8FAFF] p-3 rounded-lg border border-[#E2E8F0] leading-relaxed flex items-start justify-between gap-4">
+                           <span className="flex-1"><span className="font-bold text-indigo-600">Explanation:</span> {q.explanation}</span>
+                           <SpeechButton text={q.explanation} className="scale-75 shrink-0 bg-white text-[#94A3B8]" />
                         </p>
                       </div>
                     )}
@@ -472,7 +478,10 @@ export default function MCQGenerator({ onDownload }: Props) {
         <div className="col-span-12 lg:col-span-8">
             <div className="bg-white rounded-2xl shadow-sm border border-[#E2E8F0] p-10 h-full flex flex-col justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-[#0F172A] leading-relaxed mb-8">{q.question}</h3>
+                  <div className="flex items-start justify-between gap-4 mb-8">
+                    <h3 className="text-xl font-bold text-[#0F172A] leading-relaxed mb-0">{q.question}</h3>
+                    <SpeechButton text={q.question} />
+                  </div>
 
                   <div className="grid grid-cols-1 gap-3.5">
                       {q.options.map((opt, i) => {
@@ -482,10 +491,10 @@ export default function MCQGenerator({ onDownload }: Props) {
                           const showWrong = isSubmitted && isSelected && !isCorrect;
 
                           return (
-                              <button
+                              <div
                                   key={i}
-                                  onClick={() => handleOptionClick(i)}
-                                  disabled={isSubmitted}
+                                  role="button"
+                                  onClick={() => !isSubmitted && handleOptionClick(i)}
                                   className={cn(
                                       "group flex items-center gap-4 p-4 rounded-lg border transition-all text-left w-full cursor-pointer duration-200",
                                       !isSubmitted && "border-[#E2E8F0] hover:bg-[#F8FAFF] hover:border-[#6366F1]",
@@ -503,12 +512,13 @@ export default function MCQGenerator({ onDownload }: Props) {
                                   )}>
                                       {String.fromCharCode(65 + i)}
                                   </span>
-                                  <span className={cn("text-sm flex-1", (showCorrect || isSelected) ? "font-bold" : "font-semibold text-gray-700")}>
-                                      {opt}
+                                  <span className={cn("text-sm flex-1 flex items-center justify-between gap-2", (showCorrect || isSelected) ? "font-bold" : "font-semibold text-gray-700")}>
+                                      <span>{opt}</span>
+                                      <SpeechButton text={opt} className="scale-75 select-none bg-white text-[#94A3B8]" />
                                   </span>
                                   {showCorrect && <CheckCircle2 className="text-[#10B981] ml-auto" size={18} />}
                                   {showWrong && <XCircle className="text-[#F43F5E] ml-auto" size={18} />}
-                              </button>
+                              </div>
                           );
                       })}
                   </div>
@@ -529,11 +539,14 @@ export default function MCQGenerator({ onDownload }: Props) {
                                   )}>
                                       <Sparkles size={16} className="text-white" />
                                   </div>
-                                  <div className="flex-1 space-y-1">
-                                      <h4 className="font-bold text-[#0F172A] text-xs uppercase tracking-wider">
-                                          {selectedOpt === q.correctIndex ? 'Well done!' : 'Keep Learning'}
-                                      </h4>
-                                      <p className="text-gray-600 text-xs leading-relaxed">{q.explanation}</p>
+                                  <div className="flex-1 flex items-start justify-between gap-4">
+                                      <div className="flex-1 space-y-1">
+                                          <h4 className="font-bold text-[#0F172A] text-xs uppercase tracking-wider">
+                                              {selectedOpt === q.correctIndex ? 'Well done!' : 'Keep Learning'}
+                                          </h4>
+                                          <p className="text-gray-600 text-xs leading-relaxed">{q.explanation}</p>
+                                      </div>
+                                      <SpeechButton text={q.explanation} className="scale-90 shrink-0 bg-white" />
                                   </div>
                                   <button 
                                       onClick={nextQuestion}

@@ -31,7 +31,8 @@ import {
   Share2,
   Layers,
   Award,
-  Globe
+  Globe,
+  Scale
 } from 'lucide-react';
 import { cn } from './lib/utils';
 import MCQGenerator from './components/tools/MCQGenerator';
@@ -55,6 +56,9 @@ export default function App() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [apiKey, setApiKey] = useState('');
+  const [canvaClientId, setCanvaClientId] = useState('');
+  const [canvaClientSecret, setCanvaClientSecret] = useState('');
+  const [canvaTemplateId, setCanvaTemplateId] = useState('');
   const [isMobile, setIsMobile] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
     return localStorage.getItem('edugen_onboarding_completed') !== 'true';
@@ -98,10 +102,19 @@ export default function App() {
     if (savedKey) {
       setApiKey(savedKey);
     }
+    const cid = localStorage.getItem('edugen_canva_client_id');
+    if (cid) setCanvaClientId(cid);
+    const csec = localStorage.getItem('edugen_canva_client_secret');
+    if (csec) setCanvaClientSecret(csec);
+    const ctem = localStorage.getItem('edugen_canva_template_id');
+    if (ctem) setCanvaTemplateId(ctem);
   }, []);
 
   const handleSaveSettings = () => {
     localStorage.setItem('edugen_gemini_api_key', apiKey);
+    localStorage.setItem('edugen_canva_client_id', canvaClientId);
+    localStorage.setItem('edugen_canva_client_secret', canvaClientSecret);
+    localStorage.setItem('edugen_canva_template_id', canvaTemplateId);
     setShowSettingsModal(false);
   };
 
@@ -375,6 +388,16 @@ export default function App() {
       hoverColor: 'hover:border-[#DFBA6B]',
       borderStyle: 'hover:border-[#DFBA6B]/50 group-hover:text-[#4A121A]',
       description: 'Conduct interactive analysis of scientific statements, identifying dependent and independent variables' 
+    },
+    {
+      id: 'difference',
+      name: 'Difference Explainer',
+      icon: Scale,
+      color: '#059669',
+      bgColor: 'bg-[#059669]/10',
+      hoverColor: 'hover:border-[#DFBA6B]',
+      borderStyle: 'hover:border-[#DFBA6B]/50 group-hover:text-[#059669]',
+      description: 'Analyze precise structural, academic differences and comparisons between any two concepts'
     }
   ];
 
@@ -813,7 +836,7 @@ export default function App() {
                     {activeTool === 'exam' && <ExamMode onDownload={handleDownloadAdded} />}
                     {activeTool === 'visual' && <VisualAnalysis onDownload={handleDownloadAdded} />}
                     {activeTool === 'history' && <History onDownload={handleDownloadAdded} />}
-                    {['flashcard', 'mindmap', 'planner', 'debate', 'case-study', 'code-explain', 'research', 'mnemonics', 'eli5', 'jargon', 'summarizer', 'essay-grader', 'lab-report', 'formula-sheet', 'paper-questions', 'socratic', 'curriculum-map', 'interview-prep', 'citation', 'hypothesis'].includes(activeTool) && (
+                    {['flashcard', 'mindmap', 'planner', 'debate', 'case-study', 'code-explain', 'research', 'mnemonics', 'eli5', 'jargon', 'summarizer', 'essay-grader', 'lab-report', 'formula-sheet', 'paper-questions', 'socratic', 'curriculum-map', 'interview-prep', 'citation', 'hypothesis', 'difference'].includes(activeTool) && (
                       <SmartSuite toolId={activeTool} onDownload={handleDownloadAdded} />
                     )}
                   </>
@@ -847,7 +870,7 @@ export default function App() {
               </button>
             </div>
             
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 max-h-[400px] overflow-y-auto custom-scrollbar">
               <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-[#64748B] uppercase tracking-wider pl-1">
                   Groq API Key
@@ -862,6 +885,56 @@ export default function App() {
                 <p className="text-[10px] text-[#94A3B8] font-medium pl-1 leading-normal">
                   Your API key is saved safely in your browser's local storage and is only used to query the Groq Cloud platform.
                 </p>
+              </div>
+
+              {/* Canva Connect API Section */}
+              <div className="pt-4 border-t border-slate-100 space-y-4">
+                <div className="flex items-center gap-1.5 pl-1">
+                  <span className="w-2 h-2 rounded-full bg-[#3B82F6] animate-pulse" />
+                  <h4 className="text-[10px] font-black uppercase text-[#3B82F6] tracking-wider">Canva Integration Settings</h4>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-[#64748B] uppercase tracking-wider pl-1">
+                    Canva Client ID / Key
+                  </label>
+                  <input 
+                    type="text"
+                    value={canvaClientId}
+                    onChange={(e) => setCanvaClientId(e.target.value)}
+                    placeholder="Enter your Canva Developer Client ID"
+                    className="w-full h-11 px-4 py-3 bg-[#FDFBF7] border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-blue-400 focus:ring-3 focus:ring-blue-100 transition-all text-sm font-medium text-gray-800 placeholder-[#94A3B8]"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-[#64748B] uppercase tracking-wider pl-1">
+                    Canva Client Secret
+                  </label>
+                  <input 
+                    type="password"
+                    value={canvaClientSecret}
+                    onChange={(e) => setCanvaClientSecret(e.target.value)}
+                    placeholder="Enter your Canva Developer Client Secret"
+                    className="w-full h-11 px-4 py-3 bg-[#FDFBF7] border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-blue-400 focus:ring-3 focus:ring-blue-100 transition-all text-sm font-medium text-gray-800 placeholder-[#94A3B8]"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-bold text-[#64748B] uppercase tracking-wider pl-1">
+                    Canva Brand Template ID (Optional)
+                  </label>
+                  <input 
+                    type="text"
+                    value={canvaTemplateId}
+                    onChange={(e) => setCanvaTemplateId(e.target.value)}
+                    placeholder="e.g. DAFvA3_xyz8"
+                    className="w-full h-11 px-4 py-3 bg-[#FDFBF7] border border-[#E2E8F0] rounded-lg focus:outline-none focus:border-blue-400 focus:ring-3 focus:ring-blue-100 transition-all text-sm font-medium text-gray-800 placeholder-[#94A3B8]"
+                  />
+                  <p className="text-[10px] text-[#94A3B8] font-medium pl-1 leading-normal">
+                    Connects directly to Canva's brand template to trigger autofilled whiteboards dynamically. Leave blank to use our default.
+                  </p>
+                </div>
               </div>
             </div>
 

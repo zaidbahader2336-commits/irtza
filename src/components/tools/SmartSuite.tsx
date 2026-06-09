@@ -14,7 +14,8 @@ import {
   Globe, 
   Layers, 
   Lightbulb, 
-  Award 
+  Award,
+  Scale
 } from "lucide-react";
 import { generatePDF } from "../../lib/pdf";
 
@@ -187,6 +188,14 @@ export default function SmartSuite({ toolId, onDownload }: SmartSuiteProps) {
           icon: Sparkles,
           placeholder: "e.g. Sleep quality vs academic stress, Salt concentration vs boiling point of water",
           color: "#4A121A" // Maroon
+        };
+      case "difference":
+        return {
+          title: "Difference Explainer",
+          subtitle: "Analyze and parse key structural, academic differences and similarities between two concepts",
+          icon: Scale,
+          placeholder: "e.g. Mitosis vs Meiosis, React vs Vue, DNA vs RNA",
+          color: "#059669"
         };
       case "jargon":
       default:
@@ -423,6 +432,19 @@ export default function SmartSuite({ toolId, onDownload }: SmartSuiteProps) {
       });
       pdfItems.push({ type: "heading", text: "Scientific Predicted Outcome" });
       pdfItems.push({ type: "text", text: resultData.predictedOutcome });
+    } else if (toolId === "difference" && resultData.comparisonTitle) {
+      pdfItems.push({ type: "heading", text: resultData.comparisonTitle });
+      pdfItems.push({ type: "text", text: resultData.introduction });
+      pdfItems.push({ type: "heading", text: "Comparison Parameters Table" });
+      resultData.rows?.forEach((row: any) => {
+        pdfItems.push({ type: "text", text: `• ${row.feature} — ${resultData.columns?.[1] || "Concept A"}: ${row.conceptA} | ${resultData.columns?.[2] || "Concept B"}: ${row.conceptB}` });
+      });
+      pdfItems.push({ type: "heading", text: "Detailed Core Takeaways" });
+      resultData.detailedAnalyses?.forEach((analysis: string) => {
+        pdfItems.push({ type: "text", text: `• ${analysis}` });
+      });
+      pdfItems.push({ type: "heading", text: "Verdict / Conclusion" });
+      pdfItems.push({ type: "text", text: resultData.conclusion });
     }
 
     await generatePDF(`${meta.title}_${topic}`, pdfItems, {
@@ -1261,6 +1283,78 @@ export default function SmartSuite({ toolId, onDownload }: SmartSuiteProps) {
                     <strong className="text-emerald-950 block text-[9px] font-black uppercase mb-1">Predicted Theoretical Outcome & Scientific Reasoning:</strong>
                     <p className="text-slate-600 font-semibold leading-relaxed text-justify">{resultData.predictedOutcome}</p>
                   </div>
+                </div>
+              )}
+
+              {toolId === "difference" && resultData.comparisonTitle && (
+                <div className="bg-white border border-[#E2E8F0] p-6 rounded-2xl shadow-xs space-y-6 animate-in fade-in">
+                  <div className="border-l-4 border-l-[#059669] pl-4">
+                    <span className="text-[9px] font-black text-emerald-800 uppercase tracking-widest block mb-1">Conceptual Difference Explainer</span>
+                    <h3 className="text-base font-extrabold text-slate-800 leading-snug">{resultData.comparisonTitle}</h3>
+                  </div>
+
+                  {resultData.introduction && (
+                    <p className="text-xs font-semibold leading-relaxed text-slate-600 text-justify bg-slate-50 p-3 rounded-lg border border-slate-100">
+                      {resultData.introduction}
+                    </p>
+                  )}
+
+                  {/* HIGH FIDELITY COMPARATIVE TABLE */}
+                  <div className="overflow-x-auto border border-slate-200/80 rounded-xl shadow-xs">
+                    <table className="w-full text-left border-collapse min-w-[500px]">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200">
+                          <th className="px-4 py-3 text-xs font-bold text-slate-700 tracking-wider font-mono">
+                            {resultData.columns?.[0] || "Feature"}
+                          </th>
+                          <th className="px-4 py-3 text-xs font-bold text-slate-700 tracking-wider">
+                            {resultData.columns?.[1] || "Concept A"}
+                          </th>
+                          <th className="px-4 py-3 text-xs font-bold text-slate-700 tracking-wider">
+                            {resultData.columns?.[2] || "Concept B"}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {resultData.rows?.map((row: any, idx: number) => (
+                          <tr key={idx} className="border-b last:border-b-0 border-slate-150 hover:bg-slate-50/50 transition-colors">
+                            <td className="px-4 py-3 text-xs font-bold text-slate-800 bg-slate-50/20 font-mono">
+                              {row.feature}
+                            </td>
+                            <td className="px-4 py-3 text-xs text-slate-600 font-semibold leading-relaxed">
+                              {row.conceptA}
+                            </td>
+                            <td className="px-4 py-3 text-xs text-slate-600 font-semibold leading-relaxed">
+                              {row.conceptB}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* DETAILED TAKEAWAYS LIST */}
+                  {resultData.detailedAnalyses && resultData.detailedAnalyses.length > 0 && (
+                    <div className="space-y-3 pt-2">
+                      <h4 className="text-[10px] font-black text-[#059669] uppercase tracking-widest">Key Structural Differences</h4>
+                      <div className="space-y-2 ml-1">
+                        {resultData.detailedAnalyses.map((analysis: string, idx: number) => (
+                          <div key={idx} className="flex gap-2.5 items-start text-xs text-slate-600 font-semibold leading-relaxed">
+                            <span className="text-[#059669] mt-0.5">•</span>
+                            <span>{analysis}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* VERDICT CARD */}
+                  {resultData.conclusion && (
+                    <div className="p-4 bg-emerald-50/40 border border-emerald-100 rounded-xl text-xs">
+                      <strong className="text-emerald-950 block text-[9px] font-black uppercase mb-1">Final Analysis Word / Recommendation:</strong>
+                      <p className="text-slate-600 font-semibold leading-relaxed text-justify">{resultData.conclusion}</p>
+                    </div>
+                  )}
                 </div>
               )}
 

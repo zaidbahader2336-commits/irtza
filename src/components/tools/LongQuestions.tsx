@@ -15,6 +15,8 @@ import { cn } from '../../lib/utils';
 import { LongQuestion } from '../../types';
 import { generatePDF, PDFItem } from '../../lib/pdf';
 import { saveToUserHistory, getOrCreateDefaultUser } from '../../lib/userData';
+import SpeechButton from '../SpeechButton';
+import GoogleSlidesDiagramViewer from './GoogleSlidesDiagramViewer';
 
 interface Props {
   onDownload: (name: string) => void;
@@ -49,6 +51,7 @@ export default function LongQuestions({ onDownload }: Props) {
   const [gradeLevel, setGradeLevel] = useState('Undergraduate / College');
   const [language, setLanguage] = useState('English');
   const [loading, setLoading] = useState(false);
+  const [diagramSvg, setDiagramSvg] = useState('');
   const [questions, setQuestions] = useState<QuestionWithMeta[]>([]);
   const [expanded, setExpanded] = useState<number[]>([]);
   const [highlighted, setHighlighted] = useState<number[]>([]);
@@ -60,6 +63,7 @@ export default function LongQuestions({ onDownload }: Props) {
   const generateQuestions = async () => {
     if (!topic.trim()) return;
     setLoading(true);
+    setDiagramSvg('');
     try {
       const res = await fetch('/api/long-questions', {
         method: 'POST',
@@ -78,6 +82,24 @@ export default function LongQuestions({ onDownload }: Props) {
         saveToUserHistory('longQs', topic, data);
         setExpanded([]);
         setHighlighted([]);
+
+        // Fetch custom learning diagram
+        try {
+          const diagRes = await fetch('/api/generate-diagram', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ topic }),
+          });
+          if (diagRes.ok) {
+            const diagData = await diagRes.json();
+            if (diagData && diagData.svg) {
+              setDiagramSvg(diagData.svg);
+            }
+          }
+        } catch (diagErr) {
+          console.error("Optional diagram generation failed:", diagErr);
+        }
+
       } else {
         alert('Could not generate essay structures. Please try a different topic.');
       }
@@ -100,8 +122,9 @@ export default function LongQuestions({ onDownload }: Props) {
   const renderContent = (text: string, keyPoints: string[]) => {
     return (
       <div className="space-y-6">
-        <div className="prose prose-slate max-w-none text-xs text-gray-700 leading-relaxed font-medium">
+        <div className="prose prose-slate max-w-none text-xs text-gray-700 leading-relaxed font-semibold flex items-start justify-between gap-4 bg-slate-50/50 p-4 rounded-xl border border-slate-100">
           <ReactMarkdown>{text}</ReactMarkdown>
+          <SpeechButton text={text} className="scale-90" />
         </div>
 
         <div className="space-y-3 pt-5 border-t border-[#E2E8F0]">
@@ -111,9 +134,12 @@ export default function LongQuestions({ onDownload }: Props) {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
             {keyPoints.map((kp, kpi) => (
-              <div key={kpi} className="flex items-start gap-2.5 p-3.5 bg-cyan-50/40 rounded-lg border border-cyan-100">
-                <CheckCircle2 size={14} className="text-[#06B6D4] mt-0.5 shrink-0" />
-                <span className="text-xs font-bold text-cyan-900 leading-snug">{kp}</span>
+              <div key={kpi} className="flex items-start justify-between gap-2.5 p-3.5 bg-cyan-50/40 rounded-lg border border-cyan-100">
+                <div className="flex items-start gap-2">
+                  <CheckCircle2 size={14} className="text-[#06B6D4] mt-0.5 shrink-0" />
+                  <span className="text-xs font-bold text-cyan-900 leading-snug">{kp}</span>
+                </div>
+                <SpeechButton text={kp} className="scale-75 shrink-0" />
               </div>
             ))}
           </div>
@@ -135,6 +161,10 @@ export default function LongQuestions({ onDownload }: Props) {
         content.push({ type: 'text', text: `• ${kp}` });
       });
     });
+
+    if (diagramSvg) {
+      content.push({ type: 'image', text: diagramSvg });
+    }
 
     generatePDF(`${topic} Essays`, content);
     onDownload(`${topic} Essay Guide`);
@@ -291,9 +321,12 @@ export default function LongQuestions({ onDownload }: Props) {
                 <div className="w-10 h-10 rounded-xl bg-cyan-50 text-[#06B6D4] flex items-center justify-center shrink-0">
                   <FileText size={20} />
                 </div>
-                <div className="overflow-hidden">
-                  <div className="text-[9px] font-black uppercase tracking-wider text-[#06B6D4] mb-0.5">Structure Plan {i+1}</div>
-                  <h3 className="text-base font-bold text-[#0F172A] leading-snug truncate">{q.question}</h3>
+                <div className="overflow-hidden flex-1 flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-[9px] font-black uppercase tracking-wider text-[#06B6D4] mb-0.5">Structure Plan {i+1}</div>
+                    <h3 className="text-base font-bold text-[#0F172A] leading-snug truncate md:max-w-md">{q.question}</h3>
+                  </div>
+                  <SpeechButton text={q.question} className="scale-75 shrink-0 bg-white" />
                 </div>
               </div>
               <div className="shrink-0">
@@ -320,7 +353,7 @@ export default function LongQuestions({ onDownload }: Props) {
                         className={cn(
                           "flex items-center gap-1.5 h-8 px-4 rounded-lg text-[10px] font-bold transition-all border shadow-xs cursor-pointer",
                           highlighted.includes(i) 
-                            ? "bg-[#06B6D4] text-white border-transparent" 
+                             ? "bg-[#06B6D4] text-white border-transparent" 
                             : "bg-white border-[#E2E8F0] text-[#64748B] hover:border-[#06B6D4] hover:text-[#06B6D4]"
                         )}
                       >
@@ -339,6 +372,13 @@ export default function LongQuestions({ onDownload }: Props) {
           </motion.div>
         ))}
       </div>
+
+      {diagramSvg && (
+        <GoogleSlidesDiagramViewer 
+          topic={topic}
+          defaultSvg={diagramSvg}
+        />
+      )}
     </div>
   );
 }

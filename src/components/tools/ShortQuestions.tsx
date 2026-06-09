@@ -16,6 +16,8 @@ import { cn } from '../../lib/utils';
 import { ShortQuestion } from '../../types';
 import { generatePDF, PDFItem } from '../../lib/pdf';
 import { saveToUserHistory, getOrCreateDefaultUser } from '../../lib/userData';
+import SpeechButton from '../SpeechButton';
+import GoogleSlidesDiagramViewer from './GoogleSlidesDiagramViewer';
 
 interface Props {
   onDownload: (name: string) => void;
@@ -47,6 +49,7 @@ export default function ShortQuestions({ onDownload }: Props) {
   const [language, setLanguage] = useState('English');
   const [loading, setLoading] = useState(false);
   const [questions, setQuestions] = useState<ShortQuestion[]>([]);
+  const [diagramSvg, setDiagramSvg] = useState('');
   const [userAnswers, setUserAnswers] = useState<string[]>([]);
   const [aiFeedbacks, setAiFeedbacks] = useState<any[]>([]);
   const [checkingIdx, setCheckingIdx] = useState<number | null>(null);
@@ -59,6 +62,7 @@ export default function ShortQuestions({ onDownload }: Props) {
   const generateQuestions = async () => {
     if (!topic.trim()) return;
     setLoading(true);
+    setDiagramSvg('');
     try {
       const res = await fetch('/api/short-questions', {
         method: 'POST',
@@ -78,6 +82,23 @@ export default function ShortQuestions({ onDownload }: Props) {
         setUserAnswers(new Array(data.length).fill(''));
         setAiFeedbacks(new Array(data.length).fill(null));
         setShowAnswer([]);
+
+        // Automatically fetch diagram under-the-hood
+        try {
+          const diagRes = await fetch('/api/generate-diagram', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ topic }),
+          });
+          if (diagRes.ok) {
+            const diagData = await diagRes.json();
+            if (diagData && diagData.svg) {
+              setDiagramSvg(diagData.svg);
+            }
+          }
+        } catch (diagErr) {
+          console.error("Optional diagram generation failed:", diagErr);
+        }
       } else {
         alert('Could not generate questions. Please try a different topic.');
       }
@@ -140,6 +161,10 @@ export default function ShortQuestions({ onDownload }: Props) {
         content.push({ type: 'text', text: `Feedback (${aiFeedbacks[i].score}/10): ${aiFeedbacks[i].feedback}` });
       }
     });
+
+    if (diagramSvg) {
+      content.push({ type: 'image', text: diagramSvg });
+    }
 
     generatePDF(`${topic} Short Qs`, content);
     onDownload(`${topic} Short Qs`);
@@ -290,7 +315,10 @@ export default function ShortQuestions({ onDownload }: Props) {
           >
             <div className="space-y-2">
                 <span className="text-[10px] font-black uppercase tracking-wider text-[#3B82F6]">Question {i+1}</span>
-                <h3 className="text-lg font-bold text-[#0F172A] leading-snug">{q.question}</h3>
+                <div className="flex items-start justify-between gap-4">
+                  <h3 className="text-lg font-bold text-[#0F172A] leading-snug">{q.question}</h3>
+                  <SpeechButton text={q.question} />
+                </div>
             </div>
 
             <div className="space-y-4">
@@ -342,9 +370,12 @@ export default function ShortQuestions({ onDownload }: Props) {
                   className="overflow-hidden"
                 >
                   <div className="p-4 rounded-xl bg-indigo-50/50 border border-indigo-100 text-[#1E3A8A]">
-                    <div className="flex items-center gap-1.5 mb-2">
-                        <Sparkles size={14} className="text-[#6366F1]" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#6366F1]">Recommended Answer</span>
+                    <div className="flex items-center justify-between gap-4 mb-2">
+                      <div className="flex items-center gap-1.5">
+                          <Sparkles size={14} className="text-[#6366F1]" />
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#6366F1]">Recommended Answer</span>
+                      </div>
+                      <SpeechButton text={q.modelAnswer} className="bg-white/90 scale-90" />
                     </div>
                     <p className="leading-relaxed font-semibold text-xs text-gray-700">{q.modelAnswer}</p>
                   </div>
@@ -366,8 +397,11 @@ export default function ShortQuestions({ onDownload }: Props) {
                       </div>
                       <span className="font-bold text-sm text-green-800">Learning Feedback</span>
                     </div>
-                    <div className="px-3 py-1 rounded-lg bg-green-100 text-green-800 font-extrabold text-xs shadow-xs">
-                      Score: {aiFeedbacks[i].score}/10
+                    <div className="flex items-center gap-2">
+                      <div className="px-3 py-1 rounded-lg bg-green-100 text-green-800 font-extrabold text-xs shadow-xs">
+                        Score: {aiFeedbacks[i].score}/10
+                      </div>
+                      <SpeechButton text={aiFeedbacks[i].feedback} className="scale-90" />
                     </div>
                   </div>
                   <p className="text-green-800 text-sm leading-relaxed font-semibold">"{aiFeedbacks[i].feedback}"</p>
@@ -383,6 +417,13 @@ export default function ShortQuestions({ onDownload }: Props) {
             </AnimatePresence>
           </motion.div>
         ))}
+
+        {diagramSvg && (
+          <GoogleSlidesDiagramViewer 
+            topic={topic}
+            defaultSvg={diagramSvg}
+          />
+        )}
       </div>
     </div>
   );
